@@ -8,10 +8,21 @@ Version: 1 <br>
 
 ### Overview
 This catalogue contains mock images of ~100,000 galaxies from the BlueTides
-hydrodynamical simulation at z=7,8,9,10,11 and 12.
-We make mock images of these galaxies with the James Webb, Hubble, Roman, and
-Euclid Space Telescopes, as well as Subaru and VISTA.
-A full list of the available images, alongside key image properties, is shown below.
+hydrodynamical simulation at z=7,8,9,10,11 and 12. This includes mock images 
+of these galaxies with the James Webb, Hubble, Roman, and Euclid Space 
+Telescopes, as well as Subaru and VISTA.
+
+This v1.0 release of the BlueTides Mock Image Catalogue contains:
+- 540 image files, one for each of the telescope, redshift, and PSF-option combinations
+- This "README" file
+
+The primary catalog files have names of the form:
+```
+hlsp_bluetides_TELESCOPE_INSTRUMENT_zREDSHIFT_FILTER_vVERSION_sim-[PSF,NOPSF].fits
+```
+as discussed in detail below. The file format is FITS with multiplt image extensions.
+
+A table showing the available telescope configurations, alongside key image properties, is shown below.
 
 | Telescope | Instrument | Filters | Pixel Scale ('') | Image FOV (pkpc)  |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -23,6 +34,7 @@ A full list of the available images, alongside key image properties, is shown be
 | Roman | WFI | F087, F106, F129, F146, F158, F184 | 0.055 | 6  |
 | VISTA | VIRCam | Z, Y, J, H, Ks | 0.17 | 10  |
 | Subaru | HSC | z, y | 0.085 | 6  |
+
 
 ### Image Creation
 
