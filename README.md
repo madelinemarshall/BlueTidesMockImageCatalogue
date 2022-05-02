@@ -20,7 +20,7 @@ The primary catalog files have names of the form:
 ```
 hlsp_bluetides_TELESCOPE_INSTRUMENT_zREDSHIFT_FILTER_vVERSION_sim-[PSF,NOPSF].fits
 ```
-as discussed in detail below. The file format is FITS with multiplt image extensions.
+as discussed in detail below. The file format is FITS with multiple image extensions.
 
 A table showing the available telescope configurations, alongside key image properties, is shown below.
 
@@ -36,7 +36,7 @@ A table showing the available telescope configurations, alongside key image prop
 | Subaru | HSC | z, y | 0.085 | 6  |
 
 
-### Image Creation
+### Catalogue Creation
 
 These observations are created with the SynthObs package for producing synthetic
 observations (https://github.com/stephenmwilkins/SynthObs). The image creation
@@ -65,7 +65,7 @@ convolved with a model PSF, marked as sim-nopsf.
 The catalogue images are made without noise, which can be added in post-processing.
 Code to add noise is available at https://github.com/madelinemarshall/BlueTidesMockImageCatalogue
 
-### Image & Catalogue format
+### Catalogue & Image Format
 
 #### Available files:
 
