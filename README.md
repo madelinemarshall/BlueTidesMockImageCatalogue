@@ -82,7 +82,7 @@ telescope/instrument/filter combination.
 | z=12 | 31 |
 
 *Note that to reduce the large file sizes for the z=7 snapshot, we split the z=7
-catalogue into 4 separate files, each containing 17,763 galaxies. These files are
+catalogue into 4 separate files, containing 17764, 17763, 17763 and 17762 galaxies. These files are
 marked as z7-file1, z7-file2, z7-file3 and z7-file4 in the collection.
 
 The filenames show the telescope, instrument, filter, and redshift:
