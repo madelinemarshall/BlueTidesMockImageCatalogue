@@ -136,7 +136,7 @@ HLSPID  = 'BlueTides'                        * The identifier (acronym) for this
 HLSPNAME= 'BlueTides Mock Image Catalogue'   * Title for HLSP project, long form
 SIMULATD=                    T               * This is simulated data                                   
 HLSPLEAD= 'Madeline Marshall'                * Full name of HLSP project lead                                   
-HLSPVER =                    1                                                  
+HLSPVER =                    1               * Version identifier for this HLSP product                                   
 LICENSE = 'CC BY 4.0'                        * License for use of these data                                   
 LICENURL= 'https://creativecommons.org/licenses/by/4.0/'       * Data license URL                 
 HLSPTARG= 'z7-file1'                         * zREDSHIFT if z>7, and z7-fileN for N=1, 2, 3, or 4 if z=7.                                 
@@ -145,7 +145,7 @@ TELESCOP= 'hst     '                         * Simulated telescope for the mock 
 INSTRUME= 'wfc3    '                         * Simulated instrument for the mock images                                             
 FILTER  = 'f160w   '                         * Name of filter used for the mock images                                   
 PRODTYPE= 'sim-psf '                         
-* Type of data. Sim = simulated data. psf = convolved with model PSF. nopsf =  not convolved  with a PSF.                    
+* Type of data. sim = simulated data. psf = convolved with model PSF. nopsf =  not convolved with a PSF.                    
 BUNIT   = 'nJy     '                         * Brightness unit for array values
 END
 ```
