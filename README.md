@@ -87,8 +87,9 @@ marked as z7-file1, z7-file2, z7-file3 and z7-file4 in the collection.
 
 The filenames show the telescope, instrument, filter, and redshift:
 ```
-hlsp_bluetides_TELESCOPE_INSTRUMENT_zREDSHIFT_FILTER_vVERSION_sim-[PSF,NOPSF].fits
+hlsp_bluetides_TELESCOPE_INSTRUMENT_TARGET_FILTER_vVERSION_sim-[PSF,NOPSF].fits
 ```
+where TARGET = zREDSHIFT if z>7, and TARGET = z7-fileN for N in 1,2,3,4 for z=7.
 
 Example:
 PSF convolution:
@@ -130,6 +131,22 @@ HIERARCH RESOLUTION_PKPC = 0.12591028        * The pixel scale of the image in p
 HIERARCH RESOLUTION_ARCSEC = 0.0315          * The pixel scale of the image in arcsec
 HIERARCH SUPERSAMPLINGRATE = 2               * The sub-sampling rate of the native pixel scale
 HIERARCH REDSHIFT =          7               * The redshift of the snapshot
+DOI     = '10.17909/er09-4527'               * Digital Object Identifier for the HLSP data collection                       
+HLSPID  = 'BlueTides'                        * The identifier (acronym) for this HLSP collection                         
+HLSPNAME= 'BlueTides Mock Image Catalogue'   * Title for HLSP project, long form
+SIMULATD=                    T               * This is simulated data                                   
+HLSPLEAD= 'Madeline Marshall'                * Full name of HLSP project lead                                   
+HLSPVER =                    1                                                  
+LICENSE = 'CC BY 4.0'                        * License for use of these data                                   
+LICENURL= 'https://creativecommons.org/licenses/by/4.0/'       * Data license URL                 
+HLSPTARG= 'z7-file1'                         * zREDSHIFT if z>7, and z7-fileN for N=1, 2, 3, or 4 if z=7.                                 
+OBSERVAT= 'hst     '                         * Simulated observatory for the mock images                                 
+TELESCOP= 'hst     '                         * Simulated telescope for the mock images                                             
+INSTRUME= 'wfc3    '                         * Simulated instrument for the mock images                                             
+FILTER  = 'f160w   '                         * Name of filter used for the mock images                                   
+PRODTYPE= 'sim-psf '                         
+* Type of data. Sim = simulated data. psf = convolved with model PSF. nopsf =  not convolved  with a PSF.                    
+BUNIT   = 'nJy     '                         * Brightness unit for array values
 END
 ```
 
