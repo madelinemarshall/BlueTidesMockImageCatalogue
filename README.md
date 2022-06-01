@@ -31,10 +31,10 @@ is shown below.
 | | NIRCam (LW) | F277W, F356W, F410M, F444W | 0.0315 | 6  |
 | | MIRI | F560W, F770W | 0.055 | 6  |
 | HST | WFC3 | F105W, F125W, F140W, F160W | 0.065 | 6  |
-| Euclid | NISP | Y, J, H | 0.15 | 10  |
 | Roman | WFI | F087, F106, F129, F146, F158, F184 | 0.055 | 6  |
+| Euclid | NISP | Y, J, H | 0.15 | 10  |
 | VISTA | VIRCam | Z, Y, J, H, Ks | 0.17 | 10  |
-| Subaru | HSC | z, y | 0.085 | 6  |
+| Subaru | HSC | z, y | 0.085 | 10  |
 
 
 ### Catalogue Creation
