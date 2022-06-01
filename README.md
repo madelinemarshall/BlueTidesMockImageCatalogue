@@ -22,7 +22,8 @@ hlsp_bluetides_TELESCOPE_INSTRUMENT_zREDSHIFT_FILTER_vVERSION_sim-[PSF,NOPSF].fi
 ```
 as discussed in detail below. The file format is FITS with multiple image extensions.
 
-A table showing the available telescope configurations, alongside key image properties, is shown below.
+A table showing the available telescope configurations, alongside key image properties, 
+is shown below.
 
 | Telescope | Instrument | Filters | Pixel Scale ('') | Image FOV (pkpc)  |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -50,17 +51,18 @@ angular momentum of the galaxy particles.
 The light from each star particle is smoothed adaptively based on the distance
 to its nearest neighbours.
 
-We consider the FOV of 6x6 kpc around each galaxy, except for Euclid and VISTA,
+We consider the FOV of 6x6 kpc around each galaxy, except for Euclid, Subaru, and VISTA,
 which have much wider PSFs and so require a larger FOV (10x10 kpc) to contain
 the galaxy emission. The images are binned onto a pixel scale of 0.5 times the
 native pixel scale. This assumes that given sufficient dithering in the
 observations, the final image can sub-sample the original pixels by a factor of 2.
-The resulting image is convolved with the PSF of the instrument, obtained
-via TinyTim for HST, WebbPSF for JWST and Roman, **Euclid from wherever Steve got that from??**,
-and ground-based Subaru and VISTA from a simple Gaussian with FWHM of 0.6'' and
-0.66'' respectively corresponding to the typical site seeing. These images are
-marked as sim-psf in the collection. We also provide images that have _not_ been
-convolved with a model PSF, marked as sim-nopsf.
+The resulting image is convolved with the PSF of the instrument. The PSFs are 
+obtained via TinyTim for HST, and WebbPSF for JWST and Roman. Euclid NISP is 
+assumed to have a Gaussian PSF with FWHM of 0.175'' in the Y-band, 0.24'' in J, 
+and 0.28'' in H. Ground-based Subaru and VISTA are assumed to have Gaussian PSFs 
+with FWHM of 0.6'' and 0.66'' respectively, corresponding to the typical site 
+seeing. These images are marked as sim-psf in the collection. We also provide 
+images that have _not_ been convolved with a model PSF, marked as sim-nopsf.
 
 The catalogue images are made without noise, which can be added in post-processing.
 Code to add noise is available at https://github.com/madelinemarshall/BlueTidesMockImageCatalogue
@@ -82,8 +84,8 @@ telescope/instrument/filter combination.
 | z=12 | 31 |
 
 *Note that to reduce the large file sizes for the z=7 snapshot, we split the z=7
-catalogue into 4 separate files, containing 17764, 17763, 17763 and 17762 galaxies. These files are
-marked as z7-file1, z7-file2, z7-file3 and z7-file4 in the collection.
+catalogue into 4 separate files, containing 17764, 17763, 17763 and 17762 galaxies. 
+These files are marked as z7-file1, z7-file2, z7-file3 and z7-file4 in the collection.
 
 The filenames show the telescope, instrument, filter, and redshift:
 ```
