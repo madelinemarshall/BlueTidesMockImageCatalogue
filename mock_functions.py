@@ -5,12 +5,17 @@ import pandas as pd
 from astropy.io import fits
 import pickle
 
+import matplotlib
+matplotlib.rcParams['font.size'] = (9)
+matplotlib.rcParams['figure.figsize'] = (4,3.4)
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
 
 class Catalogue:
 
-    def __init__(self,z=7,catalogue_path='./',image_path='/home/mmarshal/BLUETIDES/kwatts/Images/Noiseless_FITS/MaddieUpdate/'):
+    def __init__(self,z=7,image_path='/home/mmarshal/FinalImages/FullCatalogue/'):
         # Load in catalogue and save columns as variables for ease of access
-        cat = pd.read_csv(catalogue_path+'TestCatalogue.csv',index_col=0)
+        cat = pd.read_csv(image_path+'BlueTidesMockImageCatalogue.csv',index_col=0)
         self.image_path = image_path
         self.z = z
         cat=cat.loc[(cat["redshift"]==z)]
@@ -58,9 +63,8 @@ class Catalogue:
             nFilters = len(lum_constraint)
             lum_constraint_allfilt = np.ones(self.nGals,dtype='Bool')
             for ff in range(0,nFilters):
-                print(ff,lum_constraint[ff][0],lum_constraint[ff][1],lum_constraint[ff][2])
                 filt = lum_constraint[ff][0]
-                lum_constraint_ff = (self.catalogue['lum_'+filt] > 10**lum_constraint[ff][1]) & (self.catalogue['lum_'+filt] < 10**lum_constraint[ff][2])
+                lum_constraint_ff = (self.catalogue['lum_'+filt.lower()] > 10**lum_constraint[ff][1]) & (self.catalogue['lum_'+filt.lower()] < 10**lum_constraint[ff][2])
                 lum_constraint_allfilt = np.logical_and(lum_constraint_ff,lum_constraint_allfilt)
             lum_constraint = lum_constraint_allfilt
         else:
@@ -70,9 +74,8 @@ class Catalogue:
         if rad_constraint:
             rad_constraint_allfilt = np.ones(self.nGals,dtype='Bool')
             for ff in range(0,nFilters):
-                print(ff,rad_constraint[ff][0],rad_constraint[ff][1],rad_constraint[ff][2])
                 filt = rad_constraint[ff][0]
-                rad_constraint_ff = (self.catalogue['rad_'+filt] > rad_constraint[ff][1]) & (self.catalogue['rad_'+filt] < rad_constraint[ff][2])
+                rad_constraint_ff = (self.catalogue['rad_'+filt.lower()] > rad_constraint[ff][1]) & (self.catalogue['rad_'+filt.lower()] < rad_constraint[ff][2])
                 rad_constraint_allfilt = np.logical_and(rad_constraint_ff,rad_constraint_allfilt)
             rad_constraint = rad_constraint_allfilt
         else:
@@ -107,28 +110,28 @@ class Catalogue:
 
 
     def plot_galaxies(self,telescope,instrument,filt):
+        # Telescope, instrument and filters all lowercase
+        telescope=telescope.lower()
+        instrument=instrument.lower()
+        filt=filt.lower()
         
-        # If wanting all telescopes with Y band
-        if telescope.upper() == 'ALL' and filt.upper() == 'Y':
-            filterList = [('JWST','NIRCAM','F115W'),('HST','WFC3','f105w'),('Euclid','NISP','Y'),('Roman','WFI','F106'),
-                          ('VISTA','VIRCAM','Y'),('Subaru','HSC','y')]
+        ##### All telescopes with Y band #####
+        if telescope == 'all' and filt == 'y':
+            ## Plot first set of telescopes, all have 6x6kpc FOV ##
+            filterList = [('jwst','nircam','f115w'),('hst','wfc3','f105w'),('roman','wfi','f106')]
         
             # Plot for one galaxy
             if self.nGalsSelected == 1:
                 fig,ax = plt.subplots(self.nGalsSelected,len(filterList),
                     figsize = (len(filterList)*2,self.nGalsSelected*2),
-                    gridspec_kw = {'bottom':0.15,'top':0.95})
+                    gridspec_kw = {'hspace':0.1,'wspace':0.1})
 
                 for jj in range(0,len(filterList)):
-                    ax[jj].set_xlabel('{} {} {}'.format(filterList[jj][0],filterList[jj][1],filterList[jj][2]))
-                    print(self.catalogueSelected['extensionNumber'].values)
+                    ax[jj].set_xlabel('{} {} {}'.format(filterList[jj][0].upper(),filterList[jj][1].upper(),filterList[jj][2].upper()))
                     if self.z==7:
-                        print(self.catalogueSelected['fileNumber'].values)
-                        ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}_{}.fits'.format(filterList[jj][0],
-                            self.z,filterList[jj][0],filterList[jj][1],filterList[jj][2],self.catalogueSelected['fileNumber'].values[0]))
+                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(filterList[jj][0],filterList[jj][1],self.z,self.catalogueSelected['fileNumber'].values[0],filterList[jj][2]))
                     else:
-                        ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}.fits'.format(filterList[jj][0],
-                            self.z,filterList[jj][0],filterList[jj][1],filterList[jj][2]))
+                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(filterList[jj][0],filterList[jj][1],self.z,filterList[jj][2]))
 
                     ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data,cmap='Greys')
                     res=ff[0].header['RESOLUTION_PKPC']
@@ -137,123 +140,214 @@ class Catalogue:
                     ax[jj].set_xticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
                     ax[jj].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
                     ax[jj].set_xlabel('pkpc')
-                    # Need to plot ind+1 as there is a dummy Extension 0 holding only the complete header
                     ff.close()
-                plt.suptitle('Y-band images')
+                #plt.suptitle('Y-band images')
                 
             # Plot for multiple galaxies
             else:
-                fig,ax = plt.subplots(len(filterList),self.nGalsSelected,
-                            figsize = (self.nGalsSelected*2,len(filterList)*2),
-                            gridspec_kw = {'bottom':0.05,'top':0.95,'hspace':0.07})
+                fig,ax = plt.subplots(self.nGalsSelected,len(filterList),
+                            figsize = (len(filterList)*1.5,self.nGalsSelected*1.5),
+                            gridspec_kw = {'hspace':0.1,'wspace':0.1})
 
                 for jj in range(0,len(filterList)):
-                    ax[jj,0].set_ylabel('{} {} {}'.format(filterList[jj][0],filterList[jj][1],filterList[jj][2]))
-                    print(self.catalogueSelected['extensionNumber'].values)
+                    ax[0,jj].set_title('{}\n{} {}'.format(filterList[jj][0].upper(),filterList[jj][1].upper(),filterList[jj][2].upper()))
                     for ii in range(0,self.nGalsSelected):
                         if self.z==7:
-                            print(self.catalogueSelected['fileNumber'].values[ii])
-                            ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}_{}.fits'.format(filterList[jj][0],
-                            self.z,filterList[jj][0],filterList[jj][1],filterList[jj][2],self.catalogueSelected['fileNumber'].values[0]))
+                            ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(filterList[jj][0],filterList[jj][1],self.z,self.catalogueSelected['fileNumber'].values[ii],filterList[jj][2]))
                         else:
-                            ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}.fits'.format(filterList[jj][0],
-                            self.z,filterList[jj][0],filterList[jj][1],filterList[jj][2],self.catalogueSelected['fileNumber'].values[0]))
-                        ax[jj,ii].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,cmap='Greys')
+                            ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(filterList[jj][0],filterList[jj][1],self.z,filterList[jj][2]))
+                        ax[ii,jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,cmap='Greys')
                         res=ff[0].header['RESOLUTION_PKPC']
-                        if ii==0:
-                            ax[jj,ii].set_yticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
-                            ax[jj,ii].set_yticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+
+                        
+                        if jj==0:
+                            ax[ii,jj].set_yticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
+                            ax[ii,jj].set_yticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+                            ax[ii,jj].set_ylabel('pkpc')
                         else:
-                            ax[jj,ii].set_yticks([])
-                        ax[jj,ii].set_xticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
-                        ax[jj,ii].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
-                        ax[jj,ii].set_xlim(0,ff[0].header['FIELDOFVIEW_PKPC']/res)
-                        ax[jj,ii].set_ylim(0,ff[0].header['FIELDOFVIEW_PKPC']/res)
-                        ax[jj,ii].set_xlabel('pkpc')
-                        ax[jj,ii].xaxis.set_label_coords(.5, -.08)
-                        # Need to plot ind+1 as there is a dummy Extension 0 holding only the complete header
-                        plt.suptitle('Y-band images')
+                            ax[ii,jj].set_yticks([])
+
+                        if ii<self.nGalsSelected-1:
+                            ax[ii,jj].set_xticks([])
+                        else:
+                            ax[ii,jj].set_xticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
+                            ax[ii,jj].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+                        ax[ii,jj].set_xlim(0,ff[0].header['FIELDOFVIEW_PKPC']/res)
+                        ax[ii,jj].set_ylim(0,ff[0].header['FIELDOFVIEW_PKPC']/res)
+                        
+                        ax[ii,jj].xaxis.set_label_coords(.5, -.08)
+                        ax[ii,jj].yaxis.set_label_coords(-0.08, 0.5) 
+                        
+                        if jj==0:
+                            ax[ii,jj].set_ylabel('pkpc')
+    
                         ff.close()
-            return fig
+        
+                    ax[-1,jj].set_xlabel('pkpc')
+            
+            
+            ## Plot second set of telescopes, all have 10x10kpc FOV ##
+            
+            filterList =[('euclid','nisp','y'),
+                          ('vista','vircam','y'),('subaru','hsc','y')]
+            # Plot for one galaxy
+                                 
+            if self.nGalsSelected == 1:
+                fig2,ax = plt.subplots(self.nGalsSelected,len(filterList),
+                    figsize = (len(filterList)*2,self.nGalsSelected*2),
+                    gridspec_kw = {'hspace':0.1,'wspace':0.1})
+
+                for jj in range(0,len(filterList)):
+                    ax[jj].set_xlabel('{} {} {}'.format(filterList[jj][0].upper(),filterList[jj][1].upper(),filterList[jj][2].upper()))
+                    if self.z==7:
+                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(filterList[jj][0],filterList[jj][1],self.z,self.catalogueSelected['fileNumber'].values[0],filterList[jj][2]))
+                    else:
+                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(filterList[jj][0],filterList[jj][1],self.z,filterList[jj][2]))
+
+                    ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data,cmap='Greys')
+                    res=ff[0].header['RESOLUTION_PKPC']
+                    ax[jj].set_yticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
+                    ax[jj].set_yticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+                    ax[jj].set_xticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
+                    ax[jj].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+                    ax[jj].set_xlabel('pkpc')
+                    ff.close()
+                #plt.suptitle('Y-band images')
+
+                
+            # Plot for multiple galaxies
+            else:
+                fig2,ax = plt.subplots(self.nGalsSelected,len(filterList),
+                            figsize = (len(filterList)*1.5,self.nGalsSelected*1.5),
+                            gridspec_kw = {'hspace':0.1,'wspace':0.1})
+
+                for jj in range(0,len(filterList)):
+                    ax[0,jj].set_title('{}\n{} {}'.format(filterList[jj][0].upper(),filterList[jj][1].upper(),filterList[jj][2].upper()))
+                    for ii in range(0,self.nGalsSelected):
+                        if self.z==7:
+                            ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(filterList[jj][0],filterList[jj][1],self.z,self.catalogueSelected['fileNumber'].values[ii],filterList[jj][2]))
+                        else:
+                            ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(filterList[jj][0],filterList[jj][1],self.z,filterList[jj][2]))
+                        ax[ii,jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,cmap='Greys')
+                        res=ff[0].header['RESOLUTION_PKPC']
+
+                        
+                        if jj==0:
+                            ax[ii,jj].set_yticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
+                            ax[ii,jj].set_yticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+                            ax[ii,jj].set_ylabel('pkpc')
+                        else:
+                            ax[ii,jj].set_yticks([])
+
+                        if ii<self.nGalsSelected-1:
+                            ax[ii,jj].set_xticks([])
+                        else:
+                            ax[ii,jj].set_xticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
+                            ax[ii,jj].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+                        ax[ii,jj].set_xlim(0,ff[0].header['FIELDOFVIEW_PKPC']/res)
+                        ax[ii,jj].set_ylim(0,ff[0].header['FIELDOFVIEW_PKPC']/res)
+                        
+                        ax[ii,jj].xaxis.set_label_coords(.5, -.08)
+                        ax[ii,jj].yaxis.set_label_coords(-0.08, 0.5) 
+                        
+                        if jj==0:
+                            ax[ii,jj].set_ylabel('pkpc')
+    
+                        ff.close()
+        
+                    ax[-1,jj].set_xlabel('pkpc')
+                
+            return fig,fig2
      
     
-        # If wanting all telescopes with all filters
-        elif telescope.upper() == 'ALL' and filt.upper() == 'ALL':
-            self.plot_galaxies('JWST','NIRCAM',filt = 'ALL')
-            self.plot_galaxies('JWST','MIRI',filt='ALL')  
-            for telescope in ['HST','Euclid','Roman','VISTA','Subaru']:
-                self.plot_galaxies(telescope,instrument,filt = 'ALL')
+    
+        ##### All telescopes with all filters #####
+        elif telescope == 'all' and filt == 'all': 
+            self.plot_galaxies('jwst','nircam',filt = 'all')
+            self.plot_galaxies('jwst','miri',filt='all')  
+            for telescope in ['hst','euclid','roman','vista','subaru']:
+                self.plot_galaxies(telescope,instrument,filt = 'all')
             return
 
-        # If wanting a single telescope
+        
+        
+        ##### A single telescope ##### 
         else:
             # Check that telescope is found. 
-            if telescope not in ['HST','JWST','Euclid','Roman','VISTA','Subaru']:
-                # Convert mismatched case for HST and JWST
-                if telescope.lower() in ['HST'.lower(),'JWST'.lower(),'VISTA'.lower()]:
-                    telescope = telescope.upper()
-                else:
-                    errorstr="ERROR: Telescope '{}' doesn't match those available ('HST','JWST','Euclid','Roman','VISTA','Subaru')".format(telescope)
+            if telescope not in ['hst','jwst','euclid','roman','vista','subaru']:
+                    errorstr="ERROR: Telescope '{}' doesn't match those available ('hst','jwst','euclid','roman','vista','subaru')".format(telescope)
                     print(errorstr)
                     return errorstr
-
-
-            # All instruments are uppercase
-            instrument = instrument.upper()
 
             # Check selected an available instrument
-            if telescope=='Euclid':
-                if instrument!='NISP':
-                    print('WARNING: Specified Euclid instrument "{}" is not NISP, converted to NISP'.format(instrument)) 
-                    instrument='NISP'
+            if telescope=='euclid':
+                if instrument!='nisp':
+                    print('WARNING: Specified euclid instrument "{}" is not nisp, converted to nisp'.format(instrument)) 
+                    instrument='nisp'
 
-            elif telescope=='HST':
-                if instrument!='WFC3':
-                    print('WARNING: Specified HST instrument "{}" is not WFC3, converted to WFC3'.format(instrument)) 
-                    instrument='WFC3'
+            elif telescope=='hst':
+                if instrument!='wfc3':
+                    print('WARNING: Specified hst instrument "{}" is not wfc3, converted to wfc3'.format(instrument)) 
+                    instrument='wfc3'
 
-            elif telescope=='Roman':
-                if instrument!='WFI':
-                    print('WARNING: Specified Roman instrument "{}" is not WFI, converted to WFI'.format(instrument)) 
-                    instrument='WFI'
+            elif telescope=='roman':
+                if instrument!='wfi':
+                    print('WARNING: Specified roman instrument "{}" is not wfi, converted to wfi'.format(instrument)) 
+                    instrument='wfi'
 
-            elif telescope=='VISTA':
-                if instrument!='VIRCAM':
-                    print('WARNING: Specified VISTA instrument "{}" is not VIRCAM, converted to VIRCAM'.format(instrument)) 
-                    instrument='VIRCAM'        
+            elif telescope=='vista':
+                if instrument!='vircam':
+                    print('WARNING: Specified vista instrument "{}" is not vircam, converted to vircam'.format(instrument)) 
+                    instrument='vircam'        
 
-            elif telescope=='Subaru':
-                if instrument!='HSC':
-                    print('WARNING: Specified Subaru instrument "{}" is not HSC, converted to HSC'.format(instrument)) 
-                    instrument='HSC'
+            elif telescope=='subaru':
+                if instrument!='hsc':
+                    print('WARNING: Specified subaru instrument "{}" is not hsc, converted to hsc'.format(instrument)) 
+                    instrument='hsc'
 
-            elif telescope=='JWST':
-                if instrument not in ['NIRCAM','MIRI']:
-                    errorstr = 'ERROR: Specified JWST instrument "{}" is not NIRCAM or MIRI, aborted'.format(instrument)
+            elif telescope=='jwst':
+                if instrument not in ['nircam','miri','all']:
+                    errorstr = 'ERROR: Specified jwst instrument "{}" is not nircam, miri, or all, aborted'.format(instrument)
                     print(errorstr)
                     return errorstr
 
-            filterList={'NISP':['Y','J','H'],'WFC3':['f105w','f125w','f140w','f160w'],
-                   'NIRCAM':['F090W','F115W','F150W','F200W','F277W','F356W','F444W'],'MIRI':['F560W','F770W'],
-                   'WFI':['F087','F106','F129','F146','F158','F184'],'HSC':['z','y'],'VIRCAM':['Z','Y','J','H','Ks']}
+            filterList={'nisp':['y','j','h'],'wfc3':['f105w','f125w','f140w','f160w'],
+                   'nircam':['f090w','f115w','f150w','f200w','f277w','f356w','f444w'],'miri':['f560w','f770w'],
+                   'all':['f090w','f115w','f150w','f200w','f277w','f356w','f444w','f560w','f770w'],
+                   'wfi':['f087','f106','f129','f146','f158','f184'],'hsc':['z','y'],'vircam':['z','y','j','h','ks']}
                         
                     
-            # Plot all available filters
-            if filt.upper()=='ALL':
+            ## All available filters ##
+            if filt=='all':
 
                 # Plot for one galaxy
                 if self.nGalsSelected==1:
                     fig,ax=plt.subplots(self.nGalsSelected,len(filterList[instrument]),
                         figsize=(len(filterList[instrument])*2,self.nGalsSelected*2),
                         gridspec_kw={'bottom':0.05,'top':0.95})
-                    plt.suptitle('{} {}'.format(telescope,instrument))
+                    plt.suptitle('{} {}'.format(telescope.upper(),instrument.upper()))
+                  
                     for jj,filt in enumerate(filterList[instrument]):
-                        ax[jj].set_xlabel(filt)
+                        ax[jj].set_xlabel(filt.upper())
+                        
                         if self.z==7:
-                            print(self.catalogueSelected['fileNumber'].values)
-                            ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}_{}.fits'.format(telescope,self.z,telescope,instrument,filt,self.catalogueSelected['fileNumber'].values[0]))
+                            if telescope=='jwst' and instrument=='all':
+                                if jj<7:
+                                    ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(telescope,'nircam',self.z,self.catalogueSelected['fileNumber'].values[0],filt))
+                                else:
+                                    ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(telescope,'miri',self.z,self.catalogueSelected['fileNumber'].values[0],filt))
+                            else:
+                                ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(telescope,instrument,self.z,self.catalogueSelected['fileNumber'].values[0],filt))
+                                
                         else:
-                            ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}.fits'.format(telescope,self.z,telescope,instrument,filt))
+                            if telescope=='jwst' and instrument=='all':
+                                if jj<7:
+                                    ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(telescope,'nircam',self.z,filt))
+                                else:
+                                    ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(telescope,'miri',self.z,filt))
+                            else:
+                                ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(telescope,instrument,self.z,filt))
+                            
                         ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data,cmap='Greys')
                         res=ff[0].header['RESOLUTION_PKPC']
                         ax[jj].set_yticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
@@ -262,42 +356,68 @@ class Catalogue:
                         ax[jj].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
                         ax[jj].set_xlabel('pkpc')
                         ff.close()
-                        # Need to plot ind+1 as there is a dummy Extension 0 holding only the complete header
-
-                    plt.suptitle('{} {}'.format(telescope,instrument))
+                        
+                    plt.suptitle('{} {}'.format(telescope.upper(),instrument.upper()))
+                    
                     
                 # Plot for multiple galaxies
                 else:
-                    fig,ax=plt.subplots(len(filterList[instrument]),self.nGalsSelected,
-                                figsize=(self.nGalsSelected*2,len(filterList[instrument])*2),
-                                gridspec_kw={'bottom':0.05,'top':0.95})
+                    fig,ax=plt.subplots(self.nGalsSelected,len(filterList[instrument]),
+                                figsize=(len(filterList[instrument])*1.5,self.nGalsSelected*1.5),
+                                gridspec_kw = {'hspace':0.1,'wspace':0.1})
 
                     for jj,filt in enumerate(filterList[instrument]):
-                        ax[jj,0].set_ylabel(filt)
+                        ax[0,jj].set_title(filt.upper())
                         for ii in range(0,self.nGalsSelected):
-                            #print(ii,jj)
                             if self.z==7:
-                                print(self.catalogueSelected['fileNumber'].values[ii])
-                                ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}_{}.fits'.format(telescope,self.z,telescope,instrument,filt,self.catalogueSelected['fileNumber'].values[ii]))
+                                if telescope=='jwst' and instrument=='all':
+                                    if jj<7:
+                                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(telescope,'nircam',self.z,self.catalogueSelected['fileNumber'].values[ii],filt))
+                                    else:
+                                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(telescope,'miri',self.z,self.catalogueSelected['fileNumber'].values[ii],filt))
+                                else:
+                                    ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(telescope,instrument,self.z,self.catalogueSelected['fileNumber'].values[ii],filt))
+
                             else:
-                                ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}.fits'.format(telescope,self.z,telescope,instrument,filt))
-                            print(self.catalogueSelected['extensionNumber'].values[ii])
-                            ax[jj,ii].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,cmap='Greys')
+                                if telescope=='jwst' and instrument=='all':
+                                    if jj<7:
+                                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(telescope,'nircam',self.z,filt))
+                                    else:
+                                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(telescope,'miri',self.z,filt))
+                                else:
+                                    ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(telescope,instrument,self.z,filt))
+
+                            ax[ii,jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,cmap='Greys')
                             res=ff[0].header['RESOLUTION_PKPC']
-                            ax[jj,ii].set_yticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
-                            ax[jj,ii].set_yticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
-                            ax[jj,ii].set_xticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
-                            ax[jj,ii].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
-                            ax[jj,ii].set_xlabel('pkpc')
-                            # Need to plot ind+1 as there is a dummy Extension 0 holding only the complete header
+
+                            if jj==0:
+                                ax[ii,jj].set_yticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
+                                ax[ii,jj].set_yticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+                                ax[ii,jj].set_ylabel('pkpc')
+                            else:
+                                ax[ii,jj].set_yticks([])
+                                
+                            if ii<self.nGalsSelected-1:
+                                ax[ii,jj].set_xticks([])
+                            else:
+                                ax[ii,jj].set_xticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
+                                ax[ii,jj].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
+                            
+
+                            ax[ii,jj].set_xlim(0,ff[0].header['FIELDOFVIEW_PKPC']/res)
+                            ax[ii,jj].set_ylim(0,ff[0].header['FIELDOFVIEW_PKPC']/res)
+
+                            ax[ii,jj].xaxis.set_label_coords(.5, -.08)
+                            ax[ii,jj].yaxis.set_label_coords(-0.06, 0.5)              
+                      
+
                             ff.close()
-            # Plot single filter
+
+                        ax[-1,jj].set_xlabel('pkpc')
+            
+            
+            ## Single filter ##
             else:
-                # Filters uppercase for JWST and Euclid, lowercase for HST and Spitzer
-                if telescope in ['JWST','Euclid','Roman']:
-                    filt=filt.upper()
-                elif telescope in ['HST','Subaru']:
-                    filt=filt.lower() 
                     
                 if filt not in filterList[instrument]:
                     errorstr='ERROR: Specified filter "{}" is not in filter list, aborted'.format(filt)
@@ -306,23 +426,23 @@ class Catalogue:
                     
                 else:
                     fig,ax=plt.subplots(1,self.nGalsSelected,figsize=(self.nGalsSelected*2,2))
-                    plt.suptitle('{} {} {}'.format(telescope,instrument,filt))
+                    plt.suptitle('{} {} {}'.format(telescope.upper(),instrument.upper(),filt.upper()))
                     for ii in range(0,self.nGalsSelected):
                         if self.z==7:
-                            print(self.catalogueSelected['fileNumber'].values[ii])
-                            ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}_{}.fits'.format(telescope,self.z,telescope,instrument,filt,self.catalogueSelected['fileNumber'].values[ii]))
+                            ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.format(telescope,instrument,self.z,self.catalogueSelected['fileNumber'].values[ii],filt))
                         else:
-                            ff = fits.open(self.image_path+'{}/z{}/{}.{}.{}.fits'.format(telescope,self.z,telescope,instrument,filt))
+                            ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.format(telescope,instrument,self.z,filt))
                         if self.nGalsSelected==1:
                             ax.imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,cmap='Greys')
                         else:
                             ax[ii].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,cmap='Greys')
-                    # Need to plot ind+1 as there is a dummy Extension 0 holding only the complete header
+                    
                         res=ff[0].header['RESOLUTION_PKPC']
                         ax[ii].set_yticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
                         ax[ii].set_yticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
                         ax[ii].set_xticks([0,ff[0].header['FIELDOFVIEW_PKPC']/res])
                         ax[ii].set_xticklabels(['0',str(ff[0].header['FIELDOFVIEW_PKPC'])])
                         ax[ii].set_xlabel('pkpc')
+                        ax[ii].xaxis.set_label_coords(.5, -.08)
                         ff.close()
             return fig
