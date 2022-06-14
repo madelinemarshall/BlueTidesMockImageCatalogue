@@ -22,7 +22,8 @@ hlsp_bluetides_TELESCOPE_INSTRUMENT_zREDSHIFT_FILTER_vVERSION_sim-[PSF,NOPSF].fi
 ```
 as discussed in detail below. The file format is FITS with multiple image extensions.
 
-A table showing the available telescope configurations, alongside key image properties, is shown below.
+A table showing the available telescope configurations, alongside key image properties, 
+is shown below.
 
 | Telescope | Instrument | Filters | Pixel Scale ('') | Image FOV (pkpc)  |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -30,10 +31,10 @@ A table showing the available telescope configurations, alongside key image prop
 | | NIRCam (LW) | F277W, F356W, F410M, F444W | 0.0315 | 6  |
 | | MIRI | F560W, F770W | 0.055 | 6  |
 | HST | WFC3 | F105W, F125W, F140W, F160W | 0.065 | 6  |
-| Euclid | NISP | Y, J, H | 0.15 | 10  |
 | Roman | WFI | F087, F106, F129, F146, F158, F184 | 0.055 | 6  |
+| Euclid | NISP | Y, J, H | 0.15 | 10  |
 | VISTA | VIRCam | Z, Y, J, H, Ks | 0.17 | 10  |
-| Subaru | HSC | z, y | 0.085 | 6  |
+| Subaru | HSC | z, y | 0.085 | 10  |
 
 
 ### Catalogue Creation
@@ -50,17 +51,18 @@ angular momentum of the galaxy particles.
 The light from each star particle is smoothed adaptively based on the distance
 to its nearest neighbours.
 
-We consider the FOV of 6x6 kpc around each galaxy, except for Euclid and VISTA,
+We consider the FOV of 6x6 kpc around each galaxy, except for Euclid, Subaru, and VISTA,
 which have much wider PSFs and so require a larger FOV (10x10 kpc) to contain
 the galaxy emission. The images are binned onto a pixel scale of 0.5 times the
 native pixel scale. This assumes that given sufficient dithering in the
 observations, the final image can sub-sample the original pixels by a factor of 2.
-The resulting image is convolved with the PSF of the instrument, obtained
-via TinyTim for HST, WebbPSF for JWST and Roman, **Euclid from wherever Steve got that from??**,
-and ground-based Subaru and VISTA from a simple Gaussian with FWHM of 0.6'' and
-0.66'' respectively corresponding to the typical site seeing. These images are
-marked as sim-psf in the collection. We also provide images that have _not_ been
-convolved with a model PSF, marked as sim-nopsf.
+The resulting image is convolved with the PSF of the instrument. The PSFs are 
+obtained via TinyTim for HST, and WebbPSF for JWST and Roman. Euclid NISP is 
+assumed to have a Gaussian PSF with FWHM of 0.175'' in the Y-band, 0.24'' in J, 
+and 0.28'' in H. Ground-based Subaru and VISTA are assumed to have Gaussian PSFs 
+with FWHM of 0.6'' and 0.66'' respectively, corresponding to the typical site 
+seeing. These images are marked as sim-psf in the collection. We also provide 
+images that have _not_ been convolved with a model PSF, marked as sim-nopsf.
 
 The catalogue images are made without noise, which can be added in post-processing.
 Code to add noise is available at https://github.com/madelinemarshall/BlueTidesMockImageCatalogue
@@ -82,13 +84,14 @@ telescope/instrument/filter combination.
 | z=12 | 31 |
 
 *Note that to reduce the large file sizes for the z=7 snapshot, we split the z=7
-catalogue into 4 separate files, each containing 17,763 galaxies. These files are
-marked as z7-file1, z7-file2, z7-file3 and z7-file4 in the collection.
+catalogue into 4 separate files, containing 17764, 17763, 17763 and 17762 galaxies. 
+These files are marked as z7-file1, z7-file2, z7-file3 and z7-file4 in the collection.
 
 The filenames show the telescope, instrument, filter, and redshift:
 ```
-hlsp_bluetides_TELESCOPE_INSTRUMENT_zREDSHIFT_FILTER_vVERSION_sim-[PSF,NOPSF].fits
+hlsp_bluetides_TELESCOPE_INSTRUMENT_TARGET_FILTER_vVERSION_sim-[PSF,NOPSF].fits
 ```
+where TARGET = zREDSHIFT if z>7, and TARGET = z7-fileN for N in 1,2,3,4 for z=7.
 
 Example:
 PSF convolution:
@@ -130,6 +133,22 @@ HIERARCH RESOLUTION_PKPC = 0.12591028        * The pixel scale of the image in p
 HIERARCH RESOLUTION_ARCSEC = 0.0315          * The pixel scale of the image in arcsec
 HIERARCH SUPERSAMPLINGRATE = 2               * The sub-sampling rate of the native pixel scale
 HIERARCH REDSHIFT =          7               * The redshift of the snapshot
+DOI     = '10.17909/er09-4527'               * Digital Object Identifier for the HLSP data collection                       
+HLSPID  = 'BlueTides'                        * The identifier (acronym) for this HLSP collection                         
+HLSPNAME= 'BlueTides Mock Image Catalogue'   * Title for HLSP project, long form
+SIMULATD=                    T               * This is simulated data                                   
+HLSPLEAD= 'Madeline Marshall'                * Full name of HLSP project lead                                   
+HLSPVER =                    1               * Version identifier for this HLSP product                                   
+LICENSE = 'CC BY 4.0'                        * License for use of these data                                   
+LICENURL= 'https://creativecommons.org/licenses/by/4.0/'       * Data license URL                 
+HLSPTARG= 'z7-file1'                         * zREDSHIFT if z>7, and z7-fileN for N=1, 2, 3, or 4 if z=7.                                 
+OBSERVAT= 'hst     '                         * Simulated observatory for the mock images                                 
+TELESCOP= 'hst     '                         * Simulated telescope for the mock images                                             
+INSTRUME= 'wfc3    '                         * Simulated instrument for the mock images                                             
+FILTER  = 'f160w   '                         * Name of filter used for the mock images                                   
+PRODTYPE= 'sim-psf '                         
+* Type of data. sim = simulated data. psf = convolved with model PSF. nopsf =  not convolved with a PSF.                    
+BUNIT   = 'nJy     '                         * Brightness unit for array values
 END
 ```
 
