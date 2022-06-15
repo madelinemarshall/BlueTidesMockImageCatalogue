@@ -1,8 +1,17 @@
+# Code in this Directory
+Here we provide code to help access and visualise the galaxy images contained in the BlueTides Mock Image Catalogue.
+- bluetides_mock_catalogue_functions.py: helper code to read, access and select galaxies within the catalogue, and plot their images
+- plot_selected_galaxies.ipynb: example notebook walking through how to use the functions in bluetides_mock_catalogue_functions.py. Recreates Figures 2 and 3 from the Mock Catalogue Release paper.
+- test_plot_galaxies.py: pytest file for testing that bluetides_mock_catalogue_functions.py works as intended.
+
+
+
 # BlueTides Mock Image Catalogue
 
 ### Details
-Contributor: Madeline Marshall, NRC Herzberg Astronomy & Astrophysics
+HLSP Contributor: Madeline Marshall, NRC Herzberg Astronomy & Astrophysics
 (Madeline.Marshall@nrc-cnrc.gc.ca) <br>
+HLSP Authors: Katelyn Watts, Stephen Wilkins, Tiziana Di Matteo, Jussi K. Kuusisto, William J. Roper, Aswin P. Vijayan, Yueying Ni, Yu Feng, Rupert A.C. Croft <br>
 Date: TBD <br>
 Version: 1 <br>
 
@@ -173,6 +182,3 @@ HIERARCH MASS_SOLARMASSES = '1.177723e+09'      * The solar mass measured from B
 HIERARCH FLUX_NJY = '41.73964'                  * The total flux in this image, in nJy
 END
 ```
-
-Example code for using the catalogue and and plotting these images is given at
-https://github.com/madelinemarshall/BlueTidesMockImageCatalogue
