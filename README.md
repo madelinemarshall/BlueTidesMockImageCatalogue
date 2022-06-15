@@ -10,7 +10,7 @@ Here we provide code to help access and visualise the galaxy images contained in
 
 ### Details
 HLSP Contributor: Madeline Marshall, NRC Herzberg Astronomy & Astrophysics
-(Madeline.Marshall@nrc-cnrc.gc.ca) <br>
+(Madeline.Marshall at nrc-cnrc.gc.ca) <br>
 HLSP Authors: Katelyn Watts, Stephen Wilkins, Tiziana Di Matteo, Jussi K. Kuusisto, William J. Roper, Aswin P. Vijayan, Yueying Ni, Yu Feng, Rupert A.C. Croft <br>
 Date: TBD <br>
 Version: 1 <br>
@@ -50,7 +50,7 @@ is shown below.
 
 These observations are created with the SynthObs package for producing synthetic
 observations (https://github.com/stephenmwilkins/SynthObs). The image creation
-is described in detail in Marshall et al. (in prep).
+is described in detail in Marshall et al. (submitted).
 Briefly, each star particle in a galaxy in BlueTides is assigned a spectral energy
 distribution (SED) using BPASS (version 2.2.1; Stanway & Eldridge
 2018) and CLOUDY (Ferland et al. 2017). To create the images the SED from each
