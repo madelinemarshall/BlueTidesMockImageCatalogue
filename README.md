@@ -11,7 +11,8 @@ Here we provide code to help access and visualise the galaxy images contained in
 ### Details
 HLSP Contributor: Madeline Marshall, NRC Herzberg Astronomy & Astrophysics
 (Madeline.Marshall at nrc-cnrc.gc.ca) <br>
-HLSP Authors: Katelyn Watts, Stephen Wilkins, Tiziana Di Matteo, Jussi K. Kuusisto, William J. Roper, Aswin P. Vijayan, Yueying Ni, Yu Feng, Rupert A.C. Croft <br>
+HLSP Authors: Katelyn Watts, Stephen Wilkins, Tiziana Di Matteo, Jussi K. Kuusisto, William J. Roper, Aswin P. Vijayan, 
+Yueying Ni, Yu Feng, Rupert A.C. Croft <br>
 Date: TBD <br>
 Version: 1 <br>
 
@@ -22,10 +23,11 @@ of these galaxies with the James Webb, Hubble, Roman, and Euclid Space
 Telescopes, as well as Subaru and VISTA.
 
 This v1.0 release of the BlueTides Mock Image Catalogue contains:
-- 540 image files, one for each of the telescope, redshift, and PSF-option combinations
+- 540 fits image files, containing images of all of the galaxies for each of the redshift, telescope, and PSF-option combinations
+- 1 csv table containing assorted physical and observed properties of each BlueTides galaxy in the catalogue
 - This "README" file
 
-The primary catalog files have names of the form:
+The primary catalogue files have names of the form:
 ```
 hlsp_bluetides_TELESCOPE_INSTRUMENT_zREDSHIFT_FILTER_vVERSION_sim-[PSF,NOPSF].fits
 ```
@@ -48,8 +50,8 @@ is shown below.
 
 ### Catalogue Creation
 
-These observations are created with the SynthObs package for producing synthetic
-observations (https://github.com/stephenmwilkins/SynthObs). The image creation
+These observations are created with the [SynthObs](https://github.com/stephenmwilkins/SynthObs) package for producing synthetic
+observations. The image creation
 is described in detail in Marshall et al. (submitted).
 Briefly, each star particle in a galaxy in BlueTides is assigned a spectral energy
 distribution (SED) using BPASS (version 2.2.1; Stanway & Eldridge
@@ -74,13 +76,13 @@ seeing. These images are marked as sim-psf in the collection. We also provide
 images that have _not_ been convolved with a model PSF, marked as sim-nopsf.
 
 The catalogue images are made without noise, which can be added in post-processing.
-Code to add noise is available at https://github.com/madelinemarshall/BlueTidesMockImageCatalogue
+Code to add noise is available via [GitHub](https://github.com/madelinemarshall/BlueTidesMockImageCatalogue).
 
 ### Catalogue & Image Format
 
-#### Available files:
+#### Available fits files:
 
-Each file contains all of the galaxies at the specified redshift for the defined
+Each fits file contains all of the galaxies at the specified redshift for the defined
 telescope/instrument/filter combination.
 
 | Redshift | Number of Galaxies |
@@ -117,7 +119,7 @@ hlsp_bluetides_jwst_nircam_z8_f150w_v1_sim-nopsf.fits
 These images contain a header file, and then a separate image extension for each galaxy.
 
 
-#### Header file:
+##### Header file:
 
 - Provides key information about the simulated images in this file
 - Contains a dummy array of 1s, with the same shape as the galaxy images.
@@ -161,7 +163,7 @@ BUNIT   = 'nJy     '                         * Brightness unit for array values
 END
 ```
 
-#### Image extensions
+##### Image extensions
 
 - Each extension contains an image of a galaxy in BlueTides at that redshift <br>
 - The flux is in units of nJy <br>
@@ -182,3 +184,28 @@ HIERARCH MASS_SOLARMASSES = '1.177723e+09'      * The solar mass measured from B
 HIERARCH FLUX_NJY = '41.73964'                  * The total flux in this image, in nJy
 END
 ```
+
+#### Accompanying catalogue csv file:
+
+Alongside the fits files containing the galaxy images, we provide a table of galaxy properties for use when accessing galaxies within the catalogue, 'hlsp_bluetides_multi_multi_all_multi_v1_sim.csv'. This one table contains all of the relevant properties for the galaxies at each redshift, and in each telescope/instrument/filter combination.
+
+The table columns are:
+```
+redshift                    * The redshift snapshot that the galaxy is in
+fileNumber                  * If z=7, gives the file number (1,2,3,4) in which the galaxy is located. If z>7, this is set to 0 as this is redundant.
+extensionNumber             * The fits file extension which corresponds to this galaxy in the relevant fits file. For z>7, this is 1 greater than the index, as the first fits extension is the header. This is particularly important for z=7 where the galaxies are split into 4 files.
+stellarMass                 * Galaxy stellar mass in solar masses 
+BHmass                      * Central black hole mass in solar masses 
+BHluminosity                * Intrinsic AGN luminosity, calculated from the black hole accretion rate, in  erg/s
+haloMass                    * Friends-of-friends halo mass in solar masses
+lum_FUV                     * FUV (1500 Angstrom) luminosity in erg/s/Hz 
+flux_jwst.nircam.f090w      * Total flux in the image, for the specified telescope.instrument.filter (all lower-case), in nJy
+radius_jwst.nircam.f090w    * Effective half-light radius of the galaxy as measured from the image, for the specified telescope.instrument.filter (all lower-case), in pkpc
+...                         * [all available telescope.instrument.filter combinations]
+flux_spitzer.irac.ch1       * Total flux in a 10x10 kpc FOV image with Spitzer IRCA Channel 1, in nJy (these images are not provided in the catalogue as all galaxies are unresolved)
+flux_spitzer.irac.ch2       * Total flux in a 10x10 kpc FOV image with Spitzer IRCA Channel 2, in nJy (these images are not provided in the catalogue as all galaxies are unresolved)
+```
+
+For details on the calculation of these properties, see the Mock Catalogue Release paper as well as [Marshall et al. 2022](https://doi.org/10.1093/mnras/stac380) particularly for the galaxy size calculation.
+
+Example code using this table to select galaxies from the catalogue fits files is available via [GitHub](https://github.com/madelinemarshall/BlueTidesMockImageCatalogue).
