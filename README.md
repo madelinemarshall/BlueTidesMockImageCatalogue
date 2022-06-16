@@ -119,7 +119,7 @@ hlsp_bluetides_jwst_nircam_z8_f150w_v1_sim-nopsf.fits
 These images contain a header file, and then a separate image extension for each galaxy.
 
 
-##### Header file:
+#### Header file:
 
 - Provides key information about the simulated images in this file
 - Contains a dummy array of 1s, with the same shape as the galaxy images.
@@ -163,7 +163,7 @@ BUNIT   = 'nJy     '                         * Brightness unit for array values
 END
 ```
 
-##### Image extensions
+#### Image extensions
 
 - Each extension contains an image of a galaxy in BlueTides at that redshift <br>
 - The flux is in units of nJy <br>
