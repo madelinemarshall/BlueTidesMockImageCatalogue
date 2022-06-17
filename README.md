@@ -1,14 +1,19 @@
-# Code in this Directory
+### Code in this Directory
 Here we provide code to help access and visualise the galaxy images contained in the BlueTides Mock Image Catalogue.
 - bluetides_mock_catalogue_functions.py: helper code to read, access and select galaxies within the catalogue, and plot their images
 - plot_selected_galaxies.ipynb: example notebook walking through how to use the functions in bluetides_mock_catalogue_functions.py. Recreates Figures 2 and 3 from the Mock Catalogue Release paper.
 - test_plot_galaxies.py: pytest file for testing that bluetides_mock_catalogue_functions.py works as intended.
 
+Using this code will require the catalogue csv file 'hlsp_bluetides_multi_multi_all_multi_v1_sim.csv', which contains the galaxy properties, as well as your desired fits files (e.g. various redshifts and telescope/filters) depending on your science goals. The specific fits files required to run the example notebook are listed in the notebook.
+
+
+Full details of the BlueTides Mock Image Catalogue files and structure are provided below.
+
 
 
 # BlueTides Mock Image Catalogue
 
-### Data access
+### Data Access
 The BlueTides Mock Image Catalogue will become publicly available as a High Level Science Product (HLSP) via the Mikulski Archive for Space Telescopes (MAST) archive at [doi:10.17909/er09-4527](https://doi.org/10.17909/er09-4527) once the Marshall et al. (submitted) catalogue release paper is accepted for publication. Meanwhile, **please download the preliminary version of the catalogue from [Google Drive](https://drive.google.com/drive/folders/12GdcU5cBim2ysnXRrwXNUWNUAmpVgZxm?usp=sharing)**. Note that this is the same version of the catalogue that has been used in Marshall et al. (submitted) v1.
 
 ### Details
@@ -83,7 +88,7 @@ Code to add noise is available via [GitHub](https://github.com/madelinemarshall/
 
 ### Catalogue & Image Format
 
-#### Available fits files:
+#### Available FITS Files:
 
 Each fits file contains all of the galaxies at the specified redshift for the defined
 telescope/instrument/filter combination.
@@ -122,7 +127,7 @@ hlsp_bluetides_jwst_nircam_z8_f150w_v1_sim-nopsf.fits
 These images contain a header file, and then a separate image extension for each galaxy.
 
 
-#### Header file:
+#### Header File:
 
 - Provides key information about the simulated images in this file
 - Contains a dummy array of 1s, with the same shape as the galaxy images.
@@ -166,7 +171,7 @@ BUNIT   = 'nJy     '                         * Brightness unit for array values
 END
 ```
 
-#### Image extensions
+#### Image Extensions
 
 - Each extension contains an image of a galaxy in BlueTides at that redshift <br>
 - The flux is in units of nJy <br>
@@ -188,7 +193,7 @@ HIERARCH FLUX_NJY = '41.73964'                  * The total flux in this image, 
 END
 ```
 
-#### Accompanying catalogue csv file:
+#### Accompanying Catalogue csv File:
 
 Alongside the fits files containing the galaxy images, we provide a table of galaxy properties for use when accessing galaxies within the catalogue, 'hlsp_bluetides_multi_multi_all_multi_v1_sim.csv'. This one table contains all of the relevant properties for the galaxies at each redshift, and in each telescope/instrument/filter combination.
 
