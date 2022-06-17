@@ -8,12 +8,15 @@ Here we provide code to help access and visualise the galaxy images contained in
 
 # BlueTides Mock Image Catalogue
 
+### Data access
+The BlueTides Mock Image Catalogue will become publicly available as a High Level Science Product (HLSP) via the Mikulski Archive for Space Telescopes (MAST) archive at [doi:10.17909/er09-4527](https://doi.org/10.17909/er09-4527) once the Marshall et al. (submitted) catalogue release paper is accepted for publication. Meanwhile, **please download the preliminary version of the catalogue from [Google Drive](https://drive.google.com/drive/folders/12GdcU5cBim2ysnXRrwXNUWNUAmpVgZxm?usp=sharing)**. Note that this is the same version of the catalogue that has been used in Marshall et al. (submitted) v1.
+
 ### Details
 HLSP Contributor: Madeline Marshall, NRC Herzberg Astronomy & Astrophysics
 (Madeline.Marshall at nrc-cnrc.gc.ca) <br>
 HLSP Authors: Katelyn Watts, Stephen Wilkins, Tiziana Di Matteo, Jussi K. Kuusisto, William J. Roper, Aswin P. Vijayan, 
 Yueying Ni, Yu Feng, Rupert A.C. Croft <br>
-Date: TBD <br>
+HLSP Date: TBD <br>
 Version: 1 <br>
 
 ### Overview
