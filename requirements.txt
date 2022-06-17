@@ -1,0 +1,6 @@
+# For python==3.6.4
+# Other python and package versions may work, though only tested on this configuration.
+numpy==1.19.4
+pandas==0.25.1
+matplotlib==3.1.1
+astropy==4.1
