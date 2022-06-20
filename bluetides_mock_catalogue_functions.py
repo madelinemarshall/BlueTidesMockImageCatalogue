@@ -11,13 +11,31 @@ plt.rc('font', family='serif')
 
 
 class Catalogue:
+    """
+    A class to represent a catalogue.
+
+    Attributes:
+    image_path -- Str: Path to BlueTides Mock Catalogue .csv and .fits files
+    z -- Int: redshift of interest
+    catalogue -- Table: Properties of galaxies at redshift z as read from .csv file
+    stellarMass -- Array: Stellar mass of all galaxies at redshift z, in solar masses
+    BHmass -- Array: Black hole mass of all galaxies at redshift z, in solar masses
+    haloMass -- Array: Halo mass of all galaxies at redshift z, in solar masses
+    nGals -- Int: Number of galaxies in the catalgue at redshift z
+
+    Methods:
+    print_constraint_options -- Print a list of catalogue columns with their minimum and maximum values
+    select_galaxies_with_constraints -- Select galaxies that satisfy the requested property constraints
+    select_galaxies_with_indices -- Select galaxies from the catalogue with specified indices
+    plot_galaxies -- Plot the galaxies in the selected sub-catalogue
+    """
 
     def __init__(self, z=7, image_path='/home/mmarshal/FinalImages/FullCatalogue/'):
         """Load in catalogue from the csv file and save columns as attributes for ease of access.
 
         Keyword arguments:
-        z -- redshift of snapshot. Available options are 7, 8, 9, 10, 11 or 12 (default 7)
-        image_path -- directory containing the hlsp fits and csv files
+        z -- Redshift of snapshot. Available options are 7, 8, 9, 10, 11 or 12 (default 7)
+        image_path -- Directory containing the hlsp fits and csv files
                       (default MM's directory - can change to your own here)
         """
         cat = pd.read_csv(image_path+'hlsp_bluetides_multi_multi_all_multi_v1_sim.csv', index_col=0)
@@ -31,29 +49,94 @@ class Catalogue:
         self.nGals = len(self.stellarMass)
         return
 
-    def print_constraint_options(self):
-        """Print a list of columns with their minimum and maximum values"""
+    def print_constraint_options(self, lum_constraint_type='lum', flux_constraint_type='flux'):
+        """Print a list of columns with their minimum and maximum values.
+
+        Keyword arguments:
+        lum_constraint_type -- Str: 'lum' for UV constraint specified in log luminosity, in erg/s/Hz,
+                                  or 'mag' for UV constraint specified in magnitudes.
+        flux_constraint_type -- Str: 'flux' for telescope constraint specified in log flux, in nJy,
+                                  or 'mag' for telescope constraint specified in magnitudes.
+        """
         cols = self.catalogue.columns.values
-        for col in cols:
-            width = 25
-            print('{: <{}}:  Min = {:0.2e}, Max = {:0.2e}'.format(col, width, np.min(self.catalogue[col]),
-                                                                  np.max(self.catalogue[col])))
+        for ii, col in enumerate(cols):
+            width = 32
+            if ii < 3:
+                print('{: <{}}:  (Min, Max) = {:g}, {:g}'.format(col, width, np.min(self.catalogue[col]),
+                                                                 np.max(self.catalogue[col])))
+
+            elif col[0:4] == 'flux':
+                if flux_constraint_type == 'flux':
+                    print('{: <{}}:  (Min, Max) = {:0.1f}, {:0.1f}'.format(col+' [nJy]', width,
+                                                                           np.min(self.catalogue[col]),
+                                                                           np.max(self.catalogue[col])))
+                elif flux_constraint_type == 'mag':
+                    max_mag = -2.5*np.log10(np.min(self.catalogue[col])*1e-9)+8.90
+                    min_mag = -2.5*np.log10(np.max(self.catalogue[col])*1e-9)+8.90
+                    print('{: <{}}:  (Min, Max) = {:0.1f}, {:0.1f}'.format(col+' [AB mag]', width, min_mag, max_mag))
+
+                else:
+                    errorstr = "ERROR: Specified constraint type '{}' is not 'flux' or 'mag', aborted".\
+                               format(flux_constraint_type)
+                    print(errorstr)
+                    return
+
+            elif col == 'lum_FUV':
+                if lum_constraint_type == 'lum':
+                    print('{: <{}}:  (Min, Max) = {:0.2e}, {:0.2e}'.format(col + ' [erg/s/Hz]', width,
+                                                                           np.min(self.catalogue[col]),
+                                                                           np.max(self.catalogue[col])))
+                elif lum_constraint_type == 'mag':
+                    max_mag = lum_to_mag(np.max(self.catalogue[col]), self.z)
+                    min_mag = lum_to_mag(np.min(self.catalogue[col]), self.z)
+                    print('{: <{}}:  (Min, Max) = {:0.1f}, {:0.1f}'.format(col + ' [AB mag]', width, min_mag, max_mag))
+
+                else:
+                    errorstr = "ERROR: Specified constraint type '{}' is not 'lum' or 'mag', aborted".\
+                               format(flux_constraint_type)
+                    print(errorstr)
+                    return
+
+            elif col[0:3] == 'rad':
+                    print('{: <{}}:  (Min, Max) = {:0.2f}, {:0.2f}'.format(col+' [pkpc]', width,
+                                                                           np.min(self.catalogue[col]),
+                                                                           np.max(self.catalogue[col])))
+            elif col == 'BHluminosity':
+                print('{: <{}}:  (Min, Max) = {:0.2e} = {:0.2e}'.format(col+' [erg/s]', width,
+                                                                        np.min(self.catalogue[col]),
+                                                                        np.max(self.catalogue[col])))
+
+            else:
+                print('{: <{}}:  (Min, Max) = {:0.2e} = {:0.2e}'.format(col+' [Msolar]', width,
+                                                                        np.min(self.catalogue[col]),
+                                                                        np.max(self.catalogue[col])))
         return
 
     def select_galaxies_with_constraints(self, stellar_mass_constraint=None, bh_mass_constraint=None,
-                                         halo_mass_constraint=None, flux_constraint=None, radius_constraint=None):
+                                         halo_mass_constraint=None, uv_lum_constraint=None, uv_constraint_type='lum',
+                                         flux_constraint=None, flux_constraint_type='flux', radius_constraint=None):
         """Select galaxies from the catalogue that satisfy the requested property constraints.
 
         Keyword arguments:
-        stellar_mass_constraint -- Tuple: (min stellar mass, max stellar mass) (default None)
-        bh_mass_constraint -- Tuple: (min black hole mass, max black hole mass) (default None)
-        halo_mass_constraint -- Tuple: (min halo mass, max halo mass) (default None)
+        stellar_mass_constraint -- Tuple: (min stellar mass, max stellar mass). Specified in log space (default None)
+        bh_mass_constraint -- Tuple: (min black hole mass, max black hole mass). Specified in log space (default None)
+        halo_mass_constraint -- Tuple: (min halo mass, max halo mass). Specified in log space (default None)
+        uv_lum_constraint -- Tuple: (min FUV (1500A) luminosity/magnitude, max FUV luminosity/magnitude) (default None)
+        uv_constraint_type -- Str: 'lum' for constraint specified in log luminosity, in log(erg/s/Hz) (default),
+                                or 'mag' for constraint specified in magnitudes.
         flux_constraint -- List of tuples: [(min flux filter 1, max flux in filter 1), ...,
                                             (min flux in filter N, max flux in filter N)] (default None)
+        flux_constraint_type -- Str: 'flux' for constraint specified in flux, in nJy (default),
+                                  or 'mag' for constraint specified in magnitudes.
         radius_constraint -- List of tuples: [(min radius filter 1, max radius in filter 1), ...,
-                                              (min flux in filter N, max flux in filter N)] (default None)
+                                              (min flux in filter N, max flux in filter N)], in pkpc (default None)
 
-        Note that all constraints are specified in log-space, except radius.
+        Additional class attributes:
+        catalogueSelected -- Table: Properties of galaxies in the selected sub-catalogue
+        stellarMassSelected -- Array: Stellar mass of selected galaxies, in solar masses
+        BHmassSelected -- Array: Black hole mass of selected galaxies, in solar masses
+        haloMassSelected -- Array: Halo mass of selected galaxies, in solar masses
+        nGalsSelected -- Int: Number of galaxies in the selected sub-catalogue
         """
 
         # Check which galaxies match the specified constraints
@@ -74,13 +157,67 @@ class Catalogue:
         else:
             halo_mass_constraint = np.ones(self.nGals, dtype='Bool')
 
+        if uv_lum_constraint:
+            if uv_constraint_type == 'lum':
+                uv_constraint = (self.catalogue['lum_FUV'] > 10**uv_lum_constraint[0]) &\
+                                         (self.catalogue['lum_FUV'] < 10**uv_lum_constraint[1])
+            elif uv_constraint_type == 'mag':
+                uv_lum_constraint_0 = mag_to_lum(uv_lum_constraint[0], self.z)
+                uv_lum_constraint_1 = mag_to_lum(uv_lum_constraint[1], self.z)
+                uv_constraint = (self.catalogue['lum_FUV'] > uv_lum_constraint_0) &\
+                                (self.catalogue['lum_FUV'] < uv_lum_constraint_1)
+
+            else:
+                errorstr = "ERROR: Specified constraint type '{}' is not 'lum' or 'mag', aborted".\
+                           format(flux_constraint_type)
+                print(errorstr)
+                self.stellarMassSelected = []
+                self.BHmassSelected = []
+                self.haloMassSelected = []
+                self.nGalsSelected = 0
+                self.catalogueSelected = []
+                return errorstr
+
+        else:
+            uv_constraint = np.ones(self.nGals, dtype='Bool')
+
         if flux_constraint:
             nFilters = len(flux_constraint)
             flux_constraint_allfilt = np.ones(self.nGals, dtype='Bool')
             for ff in range(0, nFilters):
                 filt = flux_constraint[ff][0]
-                flux_constraint_ff = (self.catalogue['flux_'+filt.lower()] > 10**flux_constraint[ff][1]) &\
-                                     (self.catalogue['flux_'+filt.lower()] < 10**flux_constraint[ff][2])
+                if flux_constraint_type == 'flux':
+                    flux_constraint_ff = (self.catalogue['flux_'+filt.lower()] > flux_constraint[ff][1]) &\
+                                         (self.catalogue['flux_'+filt.lower()] < flux_constraint[ff][2])
+                elif flux_constraint_type == 'mag':
+                    mag_ff = -2.5*np.log10(self.catalogue['flux_'+filt.lower()]*1e-9)+8.90
+                    if flux_constraint[ff][2] > flux_constraint[ff][1]:
+                        flux_constraint_ff = (mag_ff > flux_constraint[ff][1]) &\
+                                             (mag_ff < flux_constraint[ff][2])
+                    elif flux_constraint[ff][2] < flux_constraint[ff][1]:
+                        # In case magnitudes are provided in reverse order (i.e. min brightness instead of min value)
+                        flux_constraint_ff = (mag_ff < flux_constraint[ff][1]) &\
+                                             (mag_ff > flux_constraint[ff][2])
+                    else:
+                        errorstr = "ERROR: need one magnitude constraint to be larger than the other, aborted"
+                        print(errorstr)
+                        self.stellarMassSelected = []
+                        self.BHmassSelected = []
+                        self.haloMassSelected = []
+                        self.nGalsSelected = 0
+                        self.catalogueSelected = []
+                        return errorstr
+                else:
+                    errorstr = "ERROR: Specified constraint type '{}' is not 'flux' or 'mag', aborted".\
+                               format(flux_constraint_type)
+                    print(errorstr)
+                    self.stellarMassSelected = []
+                    self.BHmassSelected = []
+                    self.haloMassSelected = []
+                    self.nGalsSelected = 0
+                    self.catalogueSelected = []
+                    return errorstr
+
                 flux_constraint_allfilt = np.logical_and(flux_constraint_ff, flux_constraint_allfilt)
             flux_constraint = flux_constraint_allfilt
         else:
@@ -98,11 +235,16 @@ class Catalogue:
         else:
             radius_constraint = np.ones(self.nGals, dtype='Bool')
 
-        selection = stellar_mass_constraint & bh_mass_constraint & halo_mass_constraint & \
+        selection = stellar_mass_constraint & bh_mass_constraint & halo_mass_constraint & uv_constraint &\
             flux_constraint & radius_constraint
 
         if len(selection[selection]) == 0:
             print('Error: No galaxies satisfy these criteria')
+            self.stellarMassSelected = []
+            self.BHmassSelected = []
+            self.haloMassSelected = []
+            self.nGalsSelected = 0
+            self.catalogueSelected = []
 
         else:
             self.stellarMassSelected = np.array(self.catalogue['stellarMass'][selection])
@@ -117,6 +259,13 @@ class Catalogue:
 
         Arguments:
         indices -- list of required indices
+
+        Additional class attributes:
+        catalogueSelected -- Table: Properties of galaxies in the selected sub-catalogue
+        stellarMassSelected -- Array: Stellar mass of selected galaxies, in solar masses
+        BHmassSelected -- Array: Black hole mass of selected galaxies, in solar masses
+        haloMassSelected -- Array: Halo mass of selected galaxies, in solar masses
+        nGalsSelected -- Int: Number of galaxies in the selected sub-catalogue
         """
         full_inds = self.catalogue.index
         selection = np.in1d(full_inds, indices)
@@ -132,10 +281,10 @@ class Catalogue:
         """Plot the galaxies in the selected sub-catalogue
 
         Arguments:
-        telescope -- requested telescope. Options are the telescope names or 'all'
-        instrument -- requested instrument. Options are the specific instrument, 'all' if telescope is 'all',
+        telescope -- Str: Requested telescope. Options are the telescope names or 'all'
+        instrument -- Str: Requested instrument. Options are the specific instrument, 'all' if telescope is 'all',
                       or 'all' for both MIRI and NIRCam for JWST
-        filt -- requested filter. Options are the specific filter, 'all', or 'y' if telescope is 'all' to plot
+        filt -- Str: Requested filter. Options are the specific filter, 'all', or 'y' if telescope is 'all' to plot
                 all y-band equivalents
 
         Returns:
@@ -505,3 +654,95 @@ class Catalogue:
                         ax[ii].xaxis.set_label_coords(.5, -.08)
                         ff.close()
             return fig
+
+
+def lum_to_mag(L, z):
+    """ Converts luminosity to magnitude, used particularly for the rest-frame FUV 1500A band (Fontanot+12, see Ni+19)
+
+    Inputs:
+    L -- Float: Luminosity (erg/s/Hz)
+    z -- Int: Redshift, either 7, 8, 9, 10, 11, or 12.
+
+    Returns:
+    mag -- Flaot: Apparent magnitude (AB mag)
+    """
+    # Values taken from Gnedin's cosmological calculator for BlueTides cosmology, assuming Omega0=0.3278, H0=69.7km/s/Mpc
+    if z == 7:
+        dlMpc = 70878.29  # Luminosity distance
+        dm = 49.25  # Distance modulus
+        dmK = 46.99  # Distance modulus + k-correction
+    elif z == 8:
+        dlMpc = 82688.79
+        dm = 49.59
+        dmK = 47.2
+    elif z == 9:
+        dlMpc = 94637.09
+        dm = 49.88
+        dmK = 47.38
+    elif z == 10:
+        dlMpc = 106715.22
+        dm = 50.14
+        dmK = 47.54
+    elif z == 11:
+        dlMpc = 118912.91
+        dm = 50.38
+        dmK = 47.68
+    elif z == 12:
+        dlMpc = 131198
+        dm = 50.59
+        dmK = dm-2.78
+    else:
+        errorstr = 'ERROR: Specified redshift "{}" is not in [7, 8, 9, 10, 11, 12], aborted'.format(z)
+        print(errorstr)
+        return errorstr
+
+    dl = (dlMpc*1e6*3.086e+18)  # cm
+    mag = -2.5 * np.log10(L/(4*np.pi*dl**2)) - 48.60-dm
+    # No k-correction required for LUV -> MUV
+    return mag
+
+
+def mag_to_lum(mag, z):
+    """ Converts magnitude to luminosity, used particularly for the rest-frame FUV 1500A band (Fontanot+12, see Ni+19)
+
+    Inputs:
+    mag -- Float: Apparent magnitude (AB mag)
+    z -- Int: Redshift, either 7, 8, 9, 10, 11, or 12.
+
+    Returns:
+    L -- Float: Luminosity (erg/s/Hz)
+    """
+    # Values taken from Gnedin's cosmological calculator for BlueTides cosmology, assuming Omega0=0.3278, H0=69.7km/s/Mpc
+    if z == 7:
+        dlMpc = 70878.29  # Luminosity distance
+        dm = 49.25  # Distance modulus
+        dmK = 46.99  # Distance modulus + k-correction
+    elif z == 8:
+        dlMpc = 82688.79
+        dm = 49.59
+        dmK = 47.2
+    elif z == 9:
+        dlMpc = 94637.09
+        dm = 49.88
+        dmK = 47.38
+    elif z == 10:
+        dlMpc = 106715.22
+        dm = 50.14
+        dmK = 47.54
+    elif z == 11:
+        dlMpc = 118912.91
+        dm = 50.38
+        dmK = 47.68
+    elif z == 12:
+        dlMpc = 131198
+        dm = 50.59
+        dmK = dm-2.78
+    else:
+        errorstr = 'ERROR: Specified redshift "{}" is not in [7, 8, 9, 10, 11, 12], aborted'.format(z)
+        print(errorstr)
+        return errorstr
+
+    dl = (dlMpc*1e6*3.086e+18)  # cm
+    L = 10**(-0.4*(mag+dm+48.60))*(4*np.pi*dl**2)
+    # No k-correction required for LUV -> MUV
+    return L
