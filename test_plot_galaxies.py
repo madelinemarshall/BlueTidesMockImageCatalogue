@@ -52,7 +52,7 @@ def test_invalid_telescope():
     cat = mock_functions.Catalogue(z=z)
     cat.select_galaxies_with_constraints(stellar_mass_constraint=(9.2, 9.5))
     out = cat.plot_galaxies('Spitzer', 'NIRCam', 'F444M')
-    assert out == "ERROR: Telescope 'spitzer' doesn't match those available "+\
+    assert out == "ERROR: Telescope 'spitzer' doesn't match those available " +\
     "('hst', 'jwst', 'euclid', 'roman', 'vista', 'subaru')"
 
 
