@@ -1,14 +1,6 @@
-
 import numpy as np
 import pandas as pd
 from astropy.io import fits
-import sys
-
-import pickle
-
-from photutils import Background2D, MedianBackground, detect_sources, deblend_sources, source_properties
-from astropy.stats import gaussian_fwhm_to_sigma
-from astropy.convolution import Gaussian2DKernel
 
 
 class empty: pass
@@ -16,8 +8,11 @@ class empty: pass
 
 class Background():
     """
+    A class to represent a background, for adding to a noiseless image.
+
     Author: Jussi Kuusisto
     Original repository: https://github.com/jussikuusisto/background_noise_gen
+
     """
 
     def __init__(self, pixel_scale, aperture_f_limit, aperture_significance, aperture_radius, verbose = False):
@@ -70,6 +65,7 @@ class Background():
 
 
 def mag_to_flux(mag):
+    """Convert AB magnitude to flux in nJy"""
     flux = 10**(-0.4*(mag-8.90))*1e9 
     return flux
 
@@ -207,6 +203,14 @@ class Image():
 
 
     def get_image_params(self):
+        """Read in the relevant image parameters from the fits header.
+
+        Additional attributes:
+        FOV -- Float: Field of view of the image in pkpc
+        width -- Float: Width of the image in arcsec
+        super_samp -- Float: The rate at which the native pixels are sub-sampled
+        native_pixel_scale -- Float: The native (non-sub-sampled)  pixel scale of the instrument, in arcsec/pixel.
+        """
         if self.catalogue.z == 7:
             ff = fits.open(self.catalogue.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.
                            format(self.telescope, self.instrument, self.catalogue.z,1, self.filt))
@@ -227,7 +231,7 @@ class Image():
         """Open the fits files for the galaxies in the catalogue, for the specified telescope/filter.
 
         Additional class attributes:
-        data -- Dict: Dictionary containing the 2D image arrays for each of the galaxies in the catalogue.
+        data -- Dict: Dictionary containing the 2D image arrays for each of the galaxies in the selected catalogue.
         """
         data = {}
   
@@ -257,11 +261,26 @@ class Image():
 
 
     def add_noise(self, exp_time, ap_f_limit, ap_sig, ap_radius):
-        """Add noise to the noiseless images (from fits) based on the exposure time and telescope sensitivity."""
-        ap_f_limit = ap_f_limit[self.telescope+'.'+self.instrument+'.'+self.filt][exp_time]
-        if self.telescope == 'jwst':
-            ap_radius=ap_radius[self.telescope+'.'+self.instrument+'.'+self.filt]
+        """Add noise to the noiseless images (from fits) based on the exposure time and telescope sensitivity.
+
+        Parameters:
+        exp_time -- Float: the exposure time of the image, in seconds.
+        ap_f_limit -- Float: Aperture flux limit, the flux detected at aperture_significanc, in nJy
+        ap_significance -- Float: Aperture significance (S/N)
+        ap_radius -- Float: Aperture radius, in arcsec
+
+        Additional attributes:
+        noisy_data -- Dict: Dictionary containing the 2D image arrays for each of the galaxies in the selected catalogue
+                            Noise has been added, on top of the noiseless images saved in self.data
+        background_level -- Float: The noise level (per pixel, not per aperture) added to the images, in nJy
+        exposure_time -- Float: Exposure time used in the noisy_data images, in seconds
+        """
+        if exp_time in ap_f_limit[self.telescope+'.'+self.instrument+'.'+self.filt].keys():
+            ap_f_limit = ap_f_limit[self.telescope+'.'+self.instrument+'.'+self.filt][exp_time]
+            if self.telescope == 'jwst':
+                ap_radius=ap_radius[self.telescope+'.'+self.instrument+'.'+self.filt]
  
+
         np.random.seed(0)
 
         self.noisy_data = {}
