@@ -1,11 +1,16 @@
 ### Code in this Directory
 Here we provide code to help access and visualise the galaxy images contained in the BlueTides Mock Image Catalogue.
-- bluetides_mock_catalogue_functions.py: helper code to read, access and select galaxies within the catalogue, and plot their images
-- plot_selected_galaxies.ipynb: example notebook walking through how to use the functions in bluetides_mock_catalogue_functions.py. Recreates Figures 2 and 3 from the Mock Catalogue Release paper.
-- test_plot_galaxies.py: pytest file for testing that bluetides_mock_catalogue_functions.py works as intended.
+- _bluetides_mock_catalogue_functions.py_: helper code to read, access and select galaxies within the catalogue, and plot their images
+- _add_noise.py_: helper code to add noise to the images from the catalogue based on exposure time, and plot the result
+- _jwst_nircam_depths.csv_: Aperture flux limits for a range of JWST NIRCam filters, for exposures from 0.55 to 10ks, spaced by 0.05ks. 
+Taken from Figure 1 of [JDocs](https://jwst-docs.stsci.edu/jwst-near-infrared-camera/nircam-predicted-performance/nircam-imaging-sensitivity). Recommended for full use of the noise generation code _add_noise.py_.
+- _plot_selected_galaxies.ipynb_: example notebook walking through how to use the functions in bluetides_mock_catalogue_functions.py. Recreates Figures 2 and 3 from the Mock Catalogue Release paper.
+- _plot_selected_galaxies.ipynb_: example notebook walking through how to use the functions in add_noise.py to add noise to the mock images.
 
-Using this code will require the catalogue csv file 'hlsp_bluetides_multi_multi_all_multi_v1_sim.csv', which contains the galaxy properties, as well as your desired fits files (e.g. various redshifts and telescope/filters) depending on your science goals. The specific fits files required to run the example notebook are listed in the notebook.
+- _test_plot_galaxies.py_: pytest file for testing that bluetides_mock_catalogue_functions.py works as intended.
+- _test_add_noise.py_: pytest file for testing that add_noise.py works as intended.
 
+Using this code will require files from the BlueTides Mock Image Catalogue, the catalogue csv file _'hlsp_bluetides_multi_multi_all_multi_v1_sim.csv'_, which contains the galaxy properties, as well as your desired fits files (e.g. various redshifts and telescope/filters) depending on your science goals. The specific fits files required to run the example notebooks are listed in the notebooks. Links for data access are given below.
 
 Full details of the BlueTides Mock Image Catalogue files and structure are provided below.
 
@@ -198,7 +203,7 @@ END
 
 #### Accompanying Catalogue csv File:
 
-Alongside the fits files containing the galaxy images, we provide a table of galaxy properties for use when accessing galaxies within the catalogue, 'hlsp_bluetides_multi_multi_all_multi_v1_sim.csv'. This one table contains all of the relevant properties for the galaxies at each redshift, and in each telescope/instrument/filter combination.
+Alongside the fits files containing the galaxy images, we provide a table of galaxy properties for use when accessing galaxies within the catalogue, _'hlsp_bluetides_multi_multi_all_multi_v1_sim.csv'_. This one table contains all of the relevant properties for the galaxies at each redshift, and in each telescope/instrument/filter combination.
 
 The table columns are:
 ```
