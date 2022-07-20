@@ -53,7 +53,7 @@ def test_invalid_telescope():
     cat.select_galaxies_with_constraints(stellar_mass_constraint=(9.2, 9.5))
     out = cat.plot_galaxies('Spitzer', 'NIRCam', 'F444M')
     assert out == "ERROR: Telescope 'spitzer' doesn't match those available " +\
-    "('hst', 'jwst', 'euclid', 'roman', 'vista', 'subaru')"
+                  "('hst', 'jwst', 'euclid', 'roman', 'vista', 'subaru')"
 
 
 def test_z12_two_galaxies_one_filter():
@@ -102,6 +102,25 @@ def test_z12_one_galaxy():
     return
 
 
+def test_z12_one_galaxy_colorbar():
+    z = 12
+    cat = mock_functions.Catalogue(z=z)
+    cat.select_galaxies_with_indices([1])
+    # Probably over-kill to test each of the options like this, but just to be sure there are no issues
+    cat.plot_galaxies('vista', 'vircam', 'all', colorbar=True)
+    cat.plot_galaxies('euclid', 'nisp', 'all', colorbar=True)
+    cat.plot_galaxies('hst', 'wfc3', 'all', colorbar=True)
+    cat.plot_galaxies('jwst', 'nircam', 'all', colorbar=True)
+    cat.plot_galaxies('jwst', 'miri', 'all', colorbar=True)
+    cat.plot_galaxies('jwst', 'all', 'all', colorbar=True)
+    cat.plot_galaxies('roman', 'wfi', 'all', colorbar=True)
+    cat.plot_galaxies('subaru', 'hsc', 'all', colorbar=True)
+    cat.plot_galaxies('all', 'all', 'all', colorbar=True)
+    cat.plot_galaxies('all', 'all', 'y', colorbar=True)
+    plt.close('all')
+    return
+
+
 def test_z11():
     z = 11
     cat = mock_functions.Catalogue(z=z)
@@ -110,6 +129,18 @@ def test_z11():
     cat.plot_galaxies('jwst', 'all', 'all')
     cat.plot_galaxies('all', 'all', 'all')
     cat.plot_galaxies('all', 'all', 'y')
+    plt.close('all')
+    return
+
+
+def test_z11_multiple_galaxies_colorbar():
+    z = 11
+    cat = mock_functions.Catalogue(z=z)
+    cat.select_galaxies_with_indices([1, 2, 3])
+    cat.plot_galaxies('vista', 'vircam', 'all', colorbar=True)
+    cat.plot_galaxies('jwst', 'all', 'all', colorbar=True)
+    cat.plot_galaxies('all', 'all', 'all', colorbar=True)
+    cat.plot_galaxies('all', 'all', 'y', colorbar=True)
     plt.close('all')
     return
 

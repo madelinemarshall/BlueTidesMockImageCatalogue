@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import pandas as pd
 from astropy.io import fits
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.ticker import MaxNLocator, FormatStrFormatter
+
 
 rcParams['font.size'] = (9)
 rcParams['figure.figsize'] = (4, 3.4)
@@ -277,7 +280,7 @@ class Catalogue:
         self.catalogueSelected = self.catalogue[selection]
         return
 
-    def plot_galaxies(self, telescope, instrument, filt):
+    def plot_galaxies(self, telescope, instrument, filt, colorbar=False):
         """Plot the galaxies in the selected sub-catalogue
 
         Arguments:
@@ -302,9 +305,14 @@ class Catalogue:
 
             # Plot for one galaxy
             if self.nGalsSelected == 1:
-                fig, ax = plt.subplots(self.nGalsSelected, len(filterList),
-                                       figsize=(len(filterList)*2, self.nGalsSelected*2),
-                                       gridspec_kw={'hspace': 0.1, 'wspace': 0.1})
+                if colorbar is True:
+                    fig, ax = plt.subplots(self.nGalsSelected, len(filterList),
+                                           figsize=(len(filterList)*2, self.nGalsSelected*2),
+                                           gridspec_kw={'hspace': 0.15, 'wspace': 0.35})
+                else:
+                    fig, ax = plt.subplots(self.nGalsSelected, len(filterList),
+                                           figsize=(len(filterList)*2, self.nGalsSelected*2),
+                                           gridspec_kw={'hspace': 0.1, 'wspace': 0.1})
 
                 for jj in range(0, len(filterList)):
                     ax[jj].set_xlabel('{} {} {}'.format(filterList[jj][0].upper(), filterList[jj][1].upper(),
@@ -317,7 +325,14 @@ class Catalogue:
                         ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.
                                        format(filterList[jj][0], filterList[jj][1], self.z, filterList[jj][2]))
 
-                    ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data, cmap='Greys')
+                    im = ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data, cmap='Greys')
+                    if colorbar is True:
+                        divider = make_axes_locatable(ax[jj])
+                        cax = divider.append_axes('right', size='5%', pad=0.05)
+                        cbar = plt.colorbar(im, cax=cax)
+                        cax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=4))
+                        cbar.ax.set_title('nJy', loc='left', pad=-5)
+
                     res = ff[0].header['RESOLUTION_PKPC']
                     ax[jj].set_yticks([0, ff[0].header['FIELDOFVIEW_PKPC']/res])
                     ax[jj].set_yticklabels(['0', str(ff[0].header['FIELDOFVIEW_PKPC'])])
@@ -328,13 +343,18 @@ class Catalogue:
 
             # Plot for multiple galaxies
             else:
-                fig, ax = plt.subplots(self.nGalsSelected, len(filterList),
-                                       figsize=(len(filterList)*1.5, self.nGalsSelected*1.5),
-                                       gridspec_kw={'hspace': 0.1, 'wspace': 0.1})
+                if colorbar is True:
+                    fig, ax = plt.subplots(self.nGalsSelected, len(filterList),
+                                           figsize=(len(filterList)*1.8, self.nGalsSelected*1.5),
+                                           gridspec_kw={'hspace': 0.15, 'wspace': 0.35})
+                else:
+                    fig, ax = plt.subplots(self.nGalsSelected, len(filterList),
+                                           figsize=(len(filterList)*1.5, self.nGalsSelected*1.5),
+                                           gridspec_kw={'hspace': 0.1, 'wspace': 0.1})
 
                 for jj in range(0, len(filterList)):
                     ax[0, jj].set_title('{}\n{} {}'.format(filterList[jj][0].upper(), filterList[jj][1].upper(),
-                                                           filterList[jj][2].upper()))
+                                                           filterList[jj][2].upper()), pad=10)
                     for ii in range(0, self.nGalsSelected):
                         if self.z == 7:
                             ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.
@@ -344,7 +364,15 @@ class Catalogue:
                             ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.
                                            format(filterList[jj][0], filterList[jj][1], self.z, filterList[jj][2]))
 
-                        ax[ii, jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data, cmap='Greys')
+                        im = ax[ii, jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,
+                                               cmap='Greys')
+                        if colorbar is True:
+                            #plt.colorbar(im, ax=ax.ravel().tolist(), shrink=0.95)
+                            divider = make_axes_locatable(ax[ii, jj])
+                            cax = divider.append_axes('right', size='5%', pad=0.05)
+                            cbar = plt.colorbar(im, cax=cax)
+                            cax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=4))
+                            cbar.ax.set_title('nJy', loc='left', pad=-5)
 
                         res = ff[0].header['RESOLUTION_PKPC']
                         if jj == 0:
@@ -392,7 +420,15 @@ class Catalogue:
                         ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.
                                        format(filterList[jj][0], filterList[jj][1], self.z, filterList[jj][2]))
 
-                    ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data, cmap='Greys')
+                    im = ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data, cmap='Greys')
+                    if colorbar is True:
+                        #plt.colorbar(im, ax=ax.ravel().tolist(), shrink=0.95)
+                        divider = make_axes_locatable(ax[jj])
+                        cax = divider.append_axes('right', size='5%', pad=0.05)
+                        cbar = plt.colorbar(im, cax=cax)
+                        cax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=4))
+                        cbar.ax.set_title('nJy', loc='left', pad=-5)
+
                     res = ff[0].header['RESOLUTION_PKPC']
                     ax[jj].set_yticks([0, ff[0].header['FIELDOFVIEW_PKPC']/res])
                     ax[jj].set_yticklabels(['0', str(ff[0].header['FIELDOFVIEW_PKPC'])])
@@ -403,13 +439,18 @@ class Catalogue:
 
             # Plot for multiple galaxies
             else:
-                fig2, ax = plt.subplots(self.nGalsSelected, len(filterList),
-                                        figsize=(len(filterList)*1.5, self.nGalsSelected*1.5),
-                                        gridspec_kw={'hspace': 0.1, 'wspace': 0.1})
+                if colorbar is True:
+                    fig2, ax = plt.subplots(self.nGalsSelected, len(filterList),
+                                            figsize=(len(filterList)*1.8, self.nGalsSelected*1.5),
+                                            gridspec_kw={'hspace': 0.15, 'wspace': 0.35})
+                else:
+                    fig2, ax = plt.subplots(self.nGalsSelected, len(filterList),
+                                            figsize=(len(filterList)*1.5, self.nGalsSelected*1.5),
+                                            gridspec_kw={'hspace': 0.1, 'wspace': 0.1})
 
                 for jj in range(0, len(filterList)):
                     ax[0, jj].set_title('{}\n{} {}'.format(filterList[jj][0].upper(), filterList[jj][1].upper(),
-                                                           filterList[jj][2].upper()))
+                                                           filterList[jj][2].upper()), pad=10)
                     for ii in range(0, self.nGalsSelected):
                         if self.z == 7:
                             ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.
@@ -418,7 +459,15 @@ class Catalogue:
                         else:
                             ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.
                                            format(filterList[jj][0], filterList[jj][1], self.z, filterList[jj][2]))
-                        ax[ii, jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data, cmap='Greys')
+                        im = ax[ii, jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,
+                                               cmap='Greys')
+                        if colorbar is True:
+                            #plt.colorbar(im, ax=ax.ravel().tolist(), shrink=0.95)
+                            divider = make_axes_locatable(ax[ii, jj])
+                            cax = divider.append_axes('right', size='5%', pad=0.05)
+                            cbar = plt.colorbar(im, cax=cax)
+                            cax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=4))
+                            cbar.ax.set_title('nJy', loc='left', pad=-5)
                         res = ff[0].header['RESOLUTION_PKPC']
 
                         if jj == 0:
@@ -514,7 +563,7 @@ class Catalogue:
                 # Plot for one galaxy
                 if self.nGalsSelected == 1:
                     fig, ax = plt.subplots(self.nGalsSelected, len(filterList[instrument]),
-                                           figsize=(len(filterList[instrument])*2, self.nGalsSelected*2),
+                                           figsize=(len(filterList[instrument])*1.8, self.nGalsSelected*1.5),
                                            gridspec_kw={'bottom': 0.05, 'top': 0.95})
                     plt.suptitle('{} {}'.format(telescope.upper(), instrument.upper()))
 
@@ -548,7 +597,14 @@ class Catalogue:
                                 ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.
                                                format(telescope, instrument, self.z, filt))
 
-                        ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data, cmap='Greys')
+                        im = ax[jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[0]].data, cmap='Greys')
+                        if colorbar is True:
+                            #plt.colorbar(im, ax=ax.ravel().tolist(), shrink=0.95)
+                            divider = make_axes_locatable(ax[jj])
+                            cax = divider.append_axes('right', size='5%', pad=0.05)
+                            cbar = plt.colorbar(im, cax=cax)
+                            cax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=4))
+                            cbar.ax.set_title('nJy', loc='left', pad=-5)
                         res = ff[0].header['RESOLUTION_PKPC']
                         ax[jj].set_yticks([0, ff[0].header['FIELDOFVIEW_PKPC']/res])
                         ax[jj].set_yticklabels(['0', str(ff[0].header['FIELDOFVIEW_PKPC'])])
@@ -561,9 +617,15 @@ class Catalogue:
 
                 # Plot for multiple galaxies
                 else:
-                    fig, ax = plt.subplots(self.nGalsSelected, len(filterList[instrument]),
-                                           figsize=(len(filterList[instrument])*1.5, self.nGalsSelected*1.5),
-                                           gridspec_kw={'hspace': 0.1, 'wspace': 0.1})
+                    if colorbar is True:
+                        fig, ax = plt.subplots(self.nGalsSelected, len(filterList[instrument]),
+                                               figsize=(len(filterList[instrument])*1.5, self.nGalsSelected*1.3),
+                                               gridspec_kw={'wspace': 0.32, 'bottom': 0.05, 'top': 0.95, 'left': 0.04,
+                                                            'right': 0.96})
+                    else:
+                        fig, ax = plt.subplots(self.nGalsSelected, len(filterList[instrument]),
+                                               figsize=(len(filterList[instrument])*1.5, self.nGalsSelected*1.5),
+                                               gridspec_kw={'hspace': 0.1, 'wspace': 0.1})
 
                     for jj, filt in enumerate(filterList[instrument]):
                         ax[0, jj].set_title(filt.upper())
@@ -571,11 +633,13 @@ class Catalogue:
                             if self.z == 7:
                                 if telescope == 'jwst' and instrument == 'all':
                                     if jj < 7:
-                                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.
+                                        ff = fits.open(self.image_path +
+                                                       'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.
                                                        format(telescope, 'nircam', self.z,
                                                               self.catalogueSelected['fileNumber'].values[ii], filt))
                                     else:
-                                        ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.
+                                        ff = fits.open(self.image_path +
+                                                       'hlsp_bluetides_{}_{}_z{}-file{}_{}_v1_sim-psf.fits'.
                                                        format(telescope, 'miri', self.z,
                                                               self.catalogueSelected['fileNumber'].values[ii], filt))
                                 else:
@@ -595,7 +659,15 @@ class Catalogue:
                                     ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.
                                                    format(telescope, instrument, self.z, filt))
 
-                            ax[ii, jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data, cmap='Greys')
+                            im = ax[ii, jj].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,
+                                                   cmap='Greys')
+                            if colorbar is True:
+                                #plt.colorbar(im, ax=ax.ravel().tolist(), shrink=0.95)
+                                divider = make_axes_locatable(ax[ii, jj])
+                                cax = divider.append_axes('right', size='5%', pad=0.05)
+                                cbar = plt.colorbar(im, cax=cax)
+                                cax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=4, steps=[1, 2, 3, 4, 5]))
+                                cbar.ax.set_title('nJy', loc='left', pad=-7)
                             res = ff[0].header['RESOLUTION_PKPC']
 
                             if jj == 0:
@@ -630,7 +702,12 @@ class Catalogue:
                     return errorstr
 
                 else:
-                    fig, ax = plt.subplots(1, self.nGalsSelected, figsize=(self.nGalsSelected*2, 2))
+                    if colorbar is True:
+                        fig, ax = plt.subplots(1, self.nGalsSelected, figsize=(self.nGalsSelected*2, 2),
+                                               gridspec_kw={'wspace': 0.35})
+                    else:
+                        fig, ax = plt.subplots(1, self.nGalsSelected, figsize=(self.nGalsSelected*2, 2))
+
                     plt.suptitle('{} {} {}'.format(telescope.upper(), instrument.upper(), filt.upper()))
                     for ii in range(0, self.nGalsSelected):
                         if self.z == 7:
@@ -641,9 +718,17 @@ class Catalogue:
                             ff = fits.open(self.image_path+'hlsp_bluetides_{}_{}_z{}_{}_v1_sim-psf.fits'.
                                            format(telescope, instrument, self.z, filt))
                         if self.nGalsSelected == 1:
-                            ax.imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data, cmap='Greys')
+                            im = ax.imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data, cmap='Greys')
                         else:
-                            ax[ii].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data, cmap='Greys')
+                            im = ax[ii].imshow(ff[self.catalogueSelected['extensionNumber'].values[ii]].data,
+                                               cmap='Greys')
+                        if colorbar is True:
+                            #plt.colorbar(im, ax=ax.ravel().tolist(), shrink=0.95)
+                            divider = make_axes_locatable(ax[ii])
+                            cax = divider.append_axes('right', size='5%', pad=0.05)
+                            cbar = plt.colorbar(im, cax=cax)
+                            cax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=4))
+                            cbar.ax.set_title('nJy', loc='left', pad=-5)
 
                         res = ff[0].header['RESOLUTION_PKPC']
                         ax[ii].set_yticks([0, ff[0].header['FIELDOFVIEW_PKPC']/res])
@@ -666,7 +751,8 @@ def lum_to_mag(L, z):
     Returns:
     mag -- Flaot: Apparent magnitude (AB mag)
     """
-    # Values taken from Gnedin's cosmological calculator for BlueTides cosmology, assuming Omega0=0.3278, H0=69.7km/s/Mpc
+    # Values taken from Gnedin's cosmological calculator for BlueTides cosmology, assuming Omega0=0.3278,
+    # H0=69.7km/s/Mpc
     if z == 7:
         dlMpc = 70878.29  # Luminosity distance
         dm = 49.25  # Distance modulus
@@ -712,7 +798,8 @@ def mag_to_lum(mag, z):
     Returns:
     L -- Float: Luminosity (erg/s/Hz)
     """
-    # Values taken from Gnedin's cosmological calculator for BlueTides cosmology, assuming Omega0=0.3278, H0=69.7km/s/Mpc
+    # Values taken from Gnedin's cosmological calculator for BlueTides cosmology, assuming Omega0=0.3278,
+    # H0=69.7km/s/Mpc
     if z == 7:
         dlMpc = 70878.29  # Luminosity distance
         dm = 49.25  # Distance modulus
