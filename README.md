@@ -19,7 +19,7 @@ Full details of the BlueTides Mock Image Catalogue files and structure are provi
 # BlueTides Mock Image Catalogue
 
 ### Data Access
-The BlueTides Mock Image Catalogue will become publicly available as a High Level Science Product (HLSP) via the Mikulski Archive for Space Telescopes (MAST) archive at [doi:10.17909/er09-4527](https://doi.org/10.17909/er09-4527) once the [Marshall et al. (submitted)](https://arxiv.org/abs/2206.08941) catalogue release paper is accepted for publication. Meanwhile, **please download the preliminary version of the catalogue from [Google Drive](https://drive.google.com/drive/folders/12GdcU5cBim2ysnXRrwXNUWNUAmpVgZxm?usp=sharing)**. Note that this is the same version of the catalogue that has been used in [Marshall et al. (submitted) v1](https://arxiv.org/abs/2206.08941).
+The BlueTides Mock Image Catalogue is publicly available as a High Level Science Product (HLSP) via the Mikulski Archive for Space Telescopes (MAST) archive at [doi:10.17909/er09-4527](https://doi.org/10.17909/er09-4527). Note that the current version v1 of the catalogue is the version used in [Marshall et al. (2022)](https://arxiv.org/abs/2206.08941).
 
 ### Usage Policy
 When using this data, please cite both the release paper (https://arxiv.org/abs/2206.08941) and the MAST DOI linking to the catalogue (https://doi.org/10.17909/er09-4527).
@@ -29,7 +29,7 @@ HLSP Contributor: Madeline Marshall, NRC Herzberg Astronomy & Astrophysics
 (Madeline.Marshall at nrc-cnrc.gc.ca) <br>
 HLSP Authors: Katelyn Watts, Stephen Wilkins, Tiziana Di Matteo, Jussi K. Kuusisto, William J. Roper, Aswin P. Vijayan, 
 Yueying Ni, Yu Feng, Rupert A.C. Croft <br>
-HLSP Date: TBD <br>
+HLSP Date: 2022-08-01 <br>
 Version: 1 <br>
 
 ### Overview
@@ -68,7 +68,7 @@ is shown below.
 
 These observations are created with the [SynthObs](https://github.com/stephenmwilkins/SynthObs) package for producing synthetic
 observations. The image creation
-is described in detail in [Marshall et al. (submitted)](https://arxiv.org/abs/2206.08941).
+is described in detail in [Marshall et al. (2022)](https://arxiv.org/abs/2206.08941).
 Briefly, each star particle in a galaxy in BlueTides is assigned a spectral energy
 distribution (SED) using BPASS (version 2.2.1; Stanway & Eldridge
 2018) and CLOUDY (Ferland et al. 2017). To create the images the SED from each
@@ -222,6 +222,6 @@ flux_spitzer.irac.ch1       * Total flux in a 10x10 kpc FOV image with Spitzer I
 flux_spitzer.irac.ch2       * Total flux in a 10x10 kpc FOV image with Spitzer IRCA Channel 2, in nJy (these images are not provided in the catalogue as all galaxies are unresolved)
 ```
 
-For details on the calculation of these properties, see the Mock Catalogue Release paper [Marshall et al. (submitted)](https://arxiv.org/abs/2206.08941) as well as [Marshall et al. 2022](https://doi.org/10.1093/mnras/stac380) particularly for the galaxy size calculation.
+For details on the calculation of these properties, see the Mock Catalogue Release paper [Marshall et al. (2022)](https://arxiv.org/abs/2206.08941) as well as [Marshall et al. 2022](https://doi.org/10.1093/mnras/stac380) particularly for the galaxy size calculation.
 
 Example code using this table to select galaxies from the catalogue fits files is available via [GitHub](https://github.com/madelinemarshall/BlueTidesMockImageCatalogue).
